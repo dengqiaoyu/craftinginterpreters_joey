@@ -1,0 +1,23 @@
+AccessModifierOffset: -4
+AlignAfterOpenBracket: DontAlign
+AllowAllArgumentsOnNextLine: false
+AlwaysBreakTemplateDeclarations: Yes
+AllowShortCaseLabelsOnASingleLine: true
+AllowShortFunctionsOnASingleLine: Empty
+AllowShortLoopsOnASingleLine: false
+BreakBeforeBraces: Custom
+BraceWrapping:
+    AfterClass: true  # Places `{` on a new line for classes only
+    AfterEnum: true  # Places `{` on a new line for enums only
+    AfterFunction: true  # Places `{` on a new line for functions only
+    BeforeWhile: false
+ColumnLimit: 120
+ContinuationIndentWidth: 4
+EmptyLineBeforeAccessModifier: LogicalBlock
+IndentAccessModifiers: false
+IndentPPDirectives: BeforeHash
+IndentWidth: 4
+PointerAlignment: Left
+StatementMacros: ['ignore_warning_begin']
+TabWidth: 4
+UseTab: Always
