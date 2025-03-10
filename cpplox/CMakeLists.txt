@@ -5,6 +5,7 @@ set(CMAKE_CXX_COMPILER clang++)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 add_compile_options(
 	-Wall # Enable most common warnings
@@ -18,11 +19,19 @@ add_compile_options(
 	-fsafe-buffer-usage-suggestions # Receive code hardening suggestions.
 )
 
-add_executable(
-	cpplox
-	exprs/expr.cpp
-	lox.cpp
-	main.cpp
-	scanner.cpp
-	token.cpp
+include_directories(
+	"${CMAKE_CURRENT_SOURCE_DIR}/src"
 )
+
+# === Target: cpplox ===
+set(CPPLOX_SOURCES
+	src/exprs/expr.cpp
+	src/lox.cpp
+	src/main.cpp
+	src/scanner.cpp
+	src/token.cpp
+)
+
+add_executable(cpplox ${CPPLOX_SOURCES})
+
+# === Target: <TBD> ===
