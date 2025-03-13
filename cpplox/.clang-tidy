@@ -1,1 +1,1 @@
-Checks: '*, -altera-unroll-loops, -cppcoreguidelines-pro-type-vararg, -fuchsia-default-arguments-calls, -fuchsia-default-arguments-declarations, -fuchsia-overloaded-operator, -hicpp-vararg, -llvmlibc-*, -modernize-use-trailing-return-type'
+Checks: '*, -abseil-string-find-str-contains, -altera-unroll-loops, -cppcoreguidelines-pro-type-vararg, -fuchsia-default-arguments-calls, -fuchsia-default-arguments-declarations, -fuchsia-overloaded-operator, -readability-identifier-length, -hicpp-vararg, -llvmlibc-*, -modernize-use-trailing-return-type'

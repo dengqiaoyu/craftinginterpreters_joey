@@ -81,18 +81,18 @@
 // NOLINTBEGIN(cppcoreguidelines-avoid-c-arrays, hicpp-avoid-c-arrays, modernize-avoid-c-arrays)
 
 template <typename... Args>
-inline std::string format_string(const char* format, Args&&... args)
+inline std::string fmt_str(const char* fmt, Args&&... args)
 {
 	// clang-format off
 	ignore_warning_begin(-Wformat-nonliteral);
 	ignore_warning_add(-Wformat-security);
 	// clang-format on
 
-	const int size = std::snprintf(nullptr, 0, format, std::forward<Args>(args)...);
-	require_throw(size >= 0, std::runtime_error("Error during formatting -- format: " + std::string(format)));
+	const int size = std::snprintf(nullptr, 0, fmt, std::forward<Args>(args)...);
+	require_throw(size >= 0, std::runtime_error("Error during formatting -- format: " + std::string(fmt)));
 
 	std::vector<char> buf(static_cast<size_t>(size) + 1);
-	(void)std::snprintf(buf.data(), buf.size(), format, std::forward<Args>(args)...);
+	(void)std::snprintf(buf.data(), buf.size(), fmt, std::forward<Args>(args)...);
 	ignore_warning_end();
 
 	return {buf.data(), static_cast<size_t>(size)};

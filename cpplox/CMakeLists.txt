@@ -34,4 +34,9 @@ set(CPPLOX_SOURCES
 
 add_executable(cpplox ${CPPLOX_SOURCES})
 
-# === Target: <TBD> ===
+# === Target: ast_generator ===
+set(AST_GENERATOR_SOURCES
+	src/tools/ast_generator.cpp
+)
+
+add_executable(ast_generator ${AST_GENERATOR_SOURCES})

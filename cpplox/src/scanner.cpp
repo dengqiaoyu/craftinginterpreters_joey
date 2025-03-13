@@ -109,7 +109,7 @@ void Scanner::scan_token()
 		if (is_alpha(c)) {
 			add_identifier();
 		} else {
-			Lox::error(m_line, format_string("Unexpected character: %c", c));
+			Lox::error(m_line, fmt_str("Unexpected character: %c", c));
 		}
 		break;
 	}
@@ -159,7 +159,7 @@ void Scanner::skip_slash_star_comment()
 	size_t depth = 1;
 	while (depth > 0) {
 		if (is_at_end()) {
-			Lox::error(m_line, format_string("Unterminated comment."));
+			Lox::error(m_line, fmt_str("Unterminated comment."));
 			return;
 		}
 		if (peek() == '\n') {
@@ -186,7 +186,7 @@ void Scanner::add_string_literal()
 	}
 
 	if (is_at_end()) {
-		Lox::error(m_line, format_string("Unterminated string."));
+		Lox::error(m_line, fmt_str("Unterminated string."));
 		return;
 	}
 

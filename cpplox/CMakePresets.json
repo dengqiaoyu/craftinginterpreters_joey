@@ -2,7 +2,7 @@
 	"version": 8,
 	"configurePresets": [
 		{
-			"name": "cpplox_debug",
+			"name": "debug",
 			"binaryDir": "${sourceDir}/build/${presetName}",
 			"cacheVariables": {
 				"CMAKE_C_COMPILER": "/usr/bin/clang",
@@ -10,6 +10,12 @@
 				"CMAKE_BUILD_TYPE": "Debug",
 				"CMAKE_EXPORT_COMPILE_COMMANDS": "ON"
 			}
+		}
+	],
+	"buildPresets": [
+		{
+			"name": "build-all",
+			"configurePreset": "debug"
 		}
 	]
 }
