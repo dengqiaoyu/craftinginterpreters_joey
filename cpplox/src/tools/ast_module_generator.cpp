@@ -53,7 +53,7 @@ int main(const int argc, const char* const argv[])
 {
 	require_action_return_value(argc == 2,
 		std::cout << "Usage: ast_module_generator <output directory path>" << std::endl, EINVAL);
-	const std::string output_dir_path(argv[1]);
+	const std::string output_dir_path(argv[1]); // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
 
 	// Create output directory.
 	std::cout << std::format("Creating output directory: {}", output_dir_path) << std::endl;
@@ -220,6 +220,17 @@ int main(const int argc, const char* const argv[])
 	ms << fmt_str("{\n");
 	ms << fmt_str("	return out_s << expr.to_string();\n");
 	ms << fmt_str("}\n\n");
+
+	// Formatter specialization for Expr
+	ms << fmt_str("// Formatter specialization for Expr\n");
+	ms << fmt_str("template <typename R>\n");
+	ms << fmt_str("struct std::formatter<Expr<R>> : std::formatter<std::string> // NOLINT(altera-struct-pack-align)\n");
+	ms << fmt_str("{\n");
+	ms << fmt_str("	auto format(const Expr<R>& expr, format_context& ctx) const\n");
+	ms << fmt_str("	{\n");
+	ms << fmt_str("		return std::formatter<std::string>::format(expr.to_string(), ctx);\n");
+	ms << fmt_str("	}\n");
+	ms << fmt_str("};\n\n");
 
 	// Derived class implementations
 	for (const auto& ast_class : ast_classes) {

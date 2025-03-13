@@ -5,8 +5,8 @@ module;
 #include <ostream>
 #include <string>
 
-#include "general.h"
 #include "token.h"
+#include "general.h"
 
 export module expr_module;
 
@@ -120,6 +120,7 @@ export
 		Token m_opr;
 		std::shared_ptr<Expr<R>> m_right;
 	};
+
 }
 
 // =====================================================================================================================
@@ -141,6 +142,16 @@ std::ostream& operator<<(std::ostream& out_s, const Expr<R>& expr)
 	return out_s << expr.to_string();
 }
 
+// Formatter specialization for Expr
+template <typename R>
+struct std::formatter<Expr<R>> : std::formatter<std::string> // NOLINT(altera-struct-pack-align)
+{
+	auto format(const Expr<R>& expr, format_context& ctx) const
+	{
+		return std::formatter<std::string>::format(expr.to_string(), ctx);
+	}
+};
+
 // =====================================================================================================================
 // Binary
 
@@ -154,8 +165,7 @@ Binary<R>::Binary(std::shared_ptr<Expr<R>> left, Token opr, std::shared_ptr<Expr
 template <typename R>
 std::string Binary<R>::to_string() const
 {
-	return fmt_str("Binary Expr{left=%s, opr=%s, right=%s}", m_left->to_string().c_str(), m_opr.to_string().c_str(),
-		m_right->to_string().c_str());
+	return fmt_str("Binary Expr{left=%s, opr=%s, right=%s}", m_left->to_string().c_str(), m_opr.to_string().c_str(), m_right->to_string().c_str());
 }
 
 template <typename R>
@@ -186,7 +196,8 @@ R Binary<R>::accept(Visitor<R>& visitor)
 // Grouping
 
 template <typename R>
-Grouping<R>::Grouping(std::shared_ptr<Expr<R>> expr) : m_expr(std::move(expr))
+Grouping<R>::Grouping(std::shared_ptr<Expr<R>> expr)
+	: m_expr(std::move(expr))
 {
 	// Empty constructor.
 }
@@ -213,7 +224,8 @@ R Grouping<R>::accept(Visitor<R>& visitor)
 // Literal
 
 template <typename R>
-Literal<R>::Literal(std::any value) : m_value(std::move(value))
+Literal<R>::Literal(std::any value)
+	: m_value(std::move(value))
 {
 	// Empty constructor.
 }
@@ -240,7 +252,8 @@ R Literal<R>::accept(Visitor<R>& visitor)
 // Unary
 
 template <typename R>
-Unary<R>::Unary(Token opr, std::shared_ptr<Expr<R>> right) : m_opr(std::move(opr)), m_right(std::move(right))
+Unary<R>::Unary(Token opr, std::shared_ptr<Expr<R>> right)
+	: m_opr(std::move(opr)), m_right(std::move(right))
 {
 	// Empty constructor.
 }
@@ -268,3 +281,4 @@ R Unary<R>::accept(Visitor<R>& visitor)
 {
 	return visitor.visit_unary_expr(*this);
 }
+
