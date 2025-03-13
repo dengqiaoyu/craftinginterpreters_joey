@@ -25,7 +25,8 @@ include_directories(
 
 # === Target: cpplox ===
 set(CPPLOX_SOURCES
-	src/exprs/expr.cpp
+
+	# src/expr.ixx
 	src/lox.cpp
 	src/main.cpp
 	src/scanner.cpp
@@ -34,9 +35,9 @@ set(CPPLOX_SOURCES
 
 add_executable(cpplox ${CPPLOX_SOURCES})
 
-# === Target: ast_generator ===
-set(AST_GENERATOR_SOURCES
-	src/tools/ast_generator.cpp
+# === Target: ast_module_generator ===
+set(AST_MODULE_GENERATOR_SOURCES
+	src/tools/ast_module_generator.cpp
 )
 
-add_executable(ast_generator ${AST_GENERATOR_SOURCES})
+add_executable(ast_module_generator ${AST_MODULE_GENERATOR_SOURCES})
