@@ -33,6 +33,7 @@ class Value
 public:
 	explicit Value();
 	explicit Value(bool value);
+	explicit Value(int value);
 	explicit Value(double value);
 	explicit Value(const std::string& value);
 
@@ -57,7 +58,7 @@ public:
 	// The destructor is also automatically generated.
 
 private:
-	std::variant<std::monostate, bool, double, std::string> m_value;
+	std::variant<std::monostate, bool, int, double, std::string> m_value;
 	ValueType m_type;
 	CLASS_PADDING(4);
 };

@@ -7,6 +7,7 @@
 
 Value::Value() : m_type(ValueType::NIL) {}
 Value::Value(bool value) : m_value(value), m_type(ValueType::BOOL) {}
+Value::Value(int value) : m_value(value), m_type(ValueType::NUMBER) {}
 Value::Value(double value) : m_value(value), m_type(ValueType::NUMBER) {}
 Value::Value(const std::string& value) : m_value(value), m_type(ValueType::STRING) {}
 
@@ -73,6 +74,8 @@ Value::to_string() const
 				return "nil";
 			} else if constexpr (std::is_same_v<T, bool>) {
 				return arg ? "true" : "false";
+			} else if constexpr (std::is_same_v<T, int>) {
+				return std::to_string(arg);
 			} else if constexpr (std::is_same_v<T, double>) {
 				return std::to_string(arg);
 			} else if constexpr (std::is_same_v<T, std::string>) {

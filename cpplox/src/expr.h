@@ -1,13 +1,12 @@
 #ifndef expr_H
 #define expr_H
 
-#include <any>
 #include <memory>
 #include <ostream>
 #include <string>
 
-#include "token.h"
 #include "general.h"
+#include "token.h"
 #include "value.h"
 
 // Forward declarations.
@@ -35,14 +34,10 @@ public:
 	Visitor& operator=(Visitor&&) noexcept = default;
 	virtual ~Visitor() = default;
 
-	virtual R
-	visit_binary_expr(const Binary<R>& expr) = 0;
-	virtual R
-	visit_grouping_expr(const Grouping<R>& expr) = 0;
-	virtual R
-	visit_literal_expr(const Literal<R>& expr) = 0;
-	virtual R
-	visit_unary_expr(const Unary<R>& expr) = 0;
+	virtual R visit_binary_expr(const Binary<R>& expr) const = 0;
+	virtual R visit_grouping_expr(const Grouping<R>& expr) const = 0;
+	virtual R visit_literal_expr(const Literal<R>& expr) const = 0;
+	virtual R visit_unary_expr(const Unary<R>& expr) const = 0;
 };
 
 // =====================================================================================================================
@@ -53,20 +48,15 @@ class Expr
 public:
 	Expr() = default;
 	Expr(const Expr&) = default;
-	Expr&
-	operator=(const Expr&) = default;
+	Expr& operator=(const Expr&) = default;
 	Expr(Expr&&) noexcept = default;
-	Expr&
-	operator=(Expr&&) noexcept = default;
+	Expr& operator=(Expr&&) noexcept = default;
 	virtual ~Expr();
-	[[nodiscard]] virtual std::string
-	to_string() const = 0;
+	[[nodiscard]] virtual std::string to_string() const = 0;
 
-	virtual R
-	accept(const Visitor<R>& visitor) const = 0;
+	virtual R accept(const Visitor<R>& visitor) const = 0;
 
-	friend std::ostream&
-	operator<<(std::ostream& out_s, const Expr& expr);
+	friend std::ostream& operator<<(std::ostream& out_s, const Expr& expr);
 };
 
 // =====================================================================================================================
@@ -75,17 +65,12 @@ class Binary : public Expr<R>
 {
 public:
 	Binary(std::shared_ptr<Expr<R>> left, Token opr, std::shared_ptr<Expr<R>> right);
-	[[nodiscard]] R
-	accept(const Visitor<R>& visitor) const override;
-	[[nodiscard]] std::string
-	to_string() const override;
+	[[nodiscard]] R accept(const Visitor<R>& visitor) const override;
+	[[nodiscard]] std::string to_string() const override;
 
-	[[nodiscard]] const Expr<R>&
-	get_left() const;
-	[[nodiscard]] const Token&
-	get_opr() const;
-	[[nodiscard]] const Expr<R>&
-	get_right() const;
+	[[nodiscard]] const Expr<R>& get_left() const;
+	[[nodiscard]] const Token& get_opr() const;
+	[[nodiscard]] const Expr<R>& get_right() const;
 
 private:
 	std::shared_ptr<Expr<R>> m_left;
@@ -99,13 +84,10 @@ class Grouping : public Expr<R>
 {
 public:
 	explicit Grouping(std::shared_ptr<Expr<R>> expr);
-	[[nodiscard]] R
-	accept(const Visitor<R>& visitor) const override;
-	[[nodiscard]] std::string
-	to_string() const override;
+	[[nodiscard]] R accept(const Visitor<R>& visitor) const override;
+	[[nodiscard]] std::string to_string() const override;
 
-	[[nodiscard]] const Expr<R>&
-	get_expr() const;
+	[[nodiscard]] const Expr<R>& get_expr() const;
 
 private:
 	std::shared_ptr<Expr<R>> m_expr;
@@ -117,13 +99,10 @@ class Literal : public Expr<R>
 {
 public:
 	explicit Literal(Value value);
-	[[nodiscard]] R
-	accept(const Visitor<R>& visitor) const override;
-	[[nodiscard]] std::string
-	to_string() const override;
+	[[nodiscard]] R accept(const Visitor<R>& visitor) const override;
+	[[nodiscard]] std::string to_string() const override;
 
-	[[nodiscard]] const Value&
-	get_value() const;
+	[[nodiscard]] const Value& get_value() const;
 
 private:
 	Value m_value;
@@ -135,15 +114,11 @@ class Unary : public Expr<R>
 {
 public:
 	Unary(Token opr, std::shared_ptr<Expr<R>> right);
-	[[nodiscard]] R
-	accept(const Visitor<R>& visitor) const override;
-	[[nodiscard]] std::string
-	to_string() const override;
+	[[nodiscard]] R accept(const Visitor<R>& visitor) const override;
+	[[nodiscard]] std::string to_string() const override;
 
-	[[nodiscard]] const Token&
-	get_opr() const;
-	[[nodiscard]] const Expr<R>&
-	get_right() const;
+	[[nodiscard]] const Token& get_opr() const;
+	[[nodiscard]] const Expr<R>& get_right() const;
 
 private:
 	Token m_opr;
@@ -168,8 +143,7 @@ operator<<(std::ostream& out_s, const Expr<R>& expr)
 template <typename R>
 struct std::formatter<Expr<R>> : std::formatter<std::string> // NOLINT(altera-struct-pack-align)
 {
-	auto
-	format(const Expr<R>& expr, format_context& ctx) const
+	auto format(const Expr<R>& expr, format_context& ctx) const
 	{
 		return std::formatter<std::string>::format(expr.to_string(), ctx);
 	}
@@ -189,7 +163,8 @@ template <typename R>
 std::string
 Binary<R>::to_string() const
 {
-	return fmt_str("Binary Expr{left=%s, opr=%s, right=%s}", m_left->to_string().c_str(), m_opr.to_string().c_str(), m_right->to_string().c_str());
+	return fmt_str("Binary Expr{left=%s, opr=%s, right=%s}", m_left->to_string().c_str(), m_opr.to_string().c_str(),
+		m_right->to_string().c_str());
 }
 
 template <typename R>
@@ -224,8 +199,7 @@ Binary<R>::accept(const Visitor<R>& visitor) const
 // Grouping
 
 template <typename R>
-Grouping<R>::Grouping(std::shared_ptr<Expr<R>> expr)
-	: m_expr(std::move(expr))
+Grouping<R>::Grouping(std::shared_ptr<Expr<R>> expr) : m_expr(std::move(expr))
 {
 	// Empty constructor.
 }
@@ -255,8 +229,7 @@ Grouping<R>::accept(const Visitor<R>& visitor) const
 // Literal
 
 template <typename R>
-Literal<R>::Literal(Value value)
-	: m_value(std::move(value))
+Literal<R>::Literal(Value value) : m_value(std::move(value))
 {
 	// Empty constructor.
 }
@@ -286,8 +259,7 @@ Literal<R>::accept(const Visitor<R>& visitor) const
 // Unary
 
 template <typename R>
-Unary<R>::Unary(Token opr, std::shared_ptr<Expr<R>> right)
-	: m_opr(std::move(opr)), m_right(std::move(right))
+Unary<R>::Unary(Token opr, std::shared_ptr<Expr<R>> right) : m_opr(std::move(opr)), m_right(std::move(right))
 {
 	// Empty constructor.
 }

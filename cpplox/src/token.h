@@ -12,7 +12,9 @@
 class Token
 {
 public:
-	Token(TokenType type, size_t line, Value literal = Value(), std::string lexeme = "");
+	Token(TokenType type, std::string lexeme);
+	Token(TokenType type, size_t line);
+	Token(TokenType type, size_t line, Value literal, std::string lexeme);
 	[[nodiscard]] std::string to_string() const;
 
 	friend std::ostream& operator<<(std::ostream& output_s, const Token& token);

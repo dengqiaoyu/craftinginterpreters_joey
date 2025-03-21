@@ -2,6 +2,16 @@
 
 #include <format>
 
+Token::Token(TokenType type, std::string lexeme) : m_line(1), m_lexeme(std::move(lexeme)), m_type(type)
+{
+	// Empty constructor.
+}
+
+Token::Token(TokenType type, size_t line) : m_line(line), m_type(type)
+{
+	// Empty constructor.
+}
+
 Token::Token(TokenType type, size_t line, Value literal, std::string lexeme)
 	: m_line(line), m_lexeme(std::move(lexeme)), m_literal(std::move(literal)), m_type(type)
 {
