@@ -1,23 +1,27 @@
 #include "token.h"
 
-#include <sstream>
+#include <format>
 
-Token::Token(const TokenType type, const size_t line, std::string lexeme, std::any literal)
+Token::Token(TokenType type, size_t line, Value literal, std::string lexeme)
 	: m_line(line), m_lexeme(std::move(lexeme)), m_literal(std::move(literal)), m_type(type)
 {
 	// Empty constructor.
 }
 
-std::string Token::to_string() const
+std::string
+Token::to_string() const
 {
-	std::stringstream str_s;
-	str_s << (*this);
-	return str_s.str();
+	return std::format("Token{{type={}, line={}, lexeme={}, literal={}}}", m_type, m_line, m_lexeme, m_literal);
 }
 
-std::ostream& operator<<(std::ostream& output_s, const Token& token)
+std::string
+Token::get_lexeme() const
 {
-	output_s << "Token{type=" << token.m_type << ", line=" << token.m_line << ", lexeme=" << token.m_lexeme
-			 << ", literal=" << token.m_literal.type().name() << "}";
-	return output_s;
+	return m_lexeme;
+}
+
+std::ostream&
+operator<<(std::ostream& output_s, const Token& token)
+{
+	return output_s << token.to_string();
 }

@@ -2,6 +2,7 @@ AccessModifierOffset: -4
 AlignAfterOpenBracket: DontAlign
 AlignConsecutiveMacros: true
 AllowAllArgumentsOnNextLine: false
+AlwaysBreakAfterReturnType: TopLevel
 AlwaysBreakTemplateDeclarations: Yes
 AllowShortCaseLabelsOnASingleLine: true
 AllowShortFunctionsOnASingleLine: Empty
@@ -11,6 +12,7 @@ BraceWrapping:
     AfterClass: true  # Places `{` on a new line for classes only
     AfterEnum: true  # Places `{` on a new line for enums only
     AfterFunction: true  # Places `{` on a new line for functions only
+    AfterUnion: true  # Places `{` on a new line for unions only
     BeforeWhile: false
 ColumnLimit: 120
 ContinuationIndentWidth: 4

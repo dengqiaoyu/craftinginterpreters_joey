@@ -1,5 +1,6 @@
 #include "scanner.h"
 
+#include <algorithm>
 #include <cstddef>
 #include <string>
 #include <unordered_map>
@@ -9,6 +10,7 @@
 #include "lox.h"
 #include "token.h"
 #include "token_type.h"
+#include "value.h"
 
 // =====================================================================================================================
 // Public methods.
@@ -18,12 +20,14 @@ Scanner::Scanner(std::string source) : m_source(std::move(source))
 	scan_tokens();
 }
 
-const std::vector<Token>& Scanner::get_tokens() const
+const std::vector<Token>&
+Scanner::get_tokens() const
 {
 	return m_tokens;
 }
 
-void Scanner::scan_tokens()
+void
+Scanner::scan_tokens()
 {
 	while (!is_at_end()) {
 		m_start = m_current;
@@ -35,17 +39,20 @@ void Scanner::scan_tokens()
 // =====================================================================================================================
 // Private methods.
 
-const std::string& Scanner::get_source() const
+std::string
+Scanner::get_source() const
 {
 	return m_source;
 }
 
-bool Scanner::is_at_end() const
+bool
+Scanner::is_at_end() const
 {
 	return m_current >= get_source().size();
 }
 
-void Scanner::scan_token()
+void
+Scanner::scan_token()
 {
 	const char c = advance(); // NOLINT(readability-identifier-length)
 	switch (c) {
@@ -115,18 +122,23 @@ void Scanner::scan_token()
 	}
 }
 
-char Scanner::advance()
+char
+Scanner::advance()
 {
 	return get_source()[m_current++];
 }
 
-void Scanner::add_token(const TokenType type, const std::any& literal)
+void
+Scanner::add_token(const TokenType type)
 {
-	const std::string lexeme = get_source().substr(m_start, m_current - m_start);
-	m_tokens.emplace_back(type, m_line, lexeme, literal);
+	std::string lexeme = get_source().substr(m_start, m_current - m_start);
+	m_tokens.emplace_back(type, m_line, Value(), std::move(lexeme));
 }
 
-char Scanner::peek() const
+// =====================================================================================================================
+
+char
+Scanner::peek() const
 {
 	if (is_at_end()) {
 		return '\0';
@@ -134,7 +146,8 @@ char Scanner::peek() const
 	return get_source()[m_current];
 }
 
-char Scanner::peek_next() const
+char
+Scanner::peek_next() const
 {
 	if (m_current + 1 >= get_source().size()) {
 		return '\0';
@@ -142,7 +155,8 @@ char Scanner::peek_next() const
 	return get_source()[m_current + 1];
 }
 
-bool Scanner::match(const char expected)
+bool
+Scanner::match(const char expected)
 {
 	if (is_at_end()) {
 		return false;
@@ -154,7 +168,8 @@ bool Scanner::match(const char expected)
 	return true;
 }
 
-void Scanner::skip_slash_star_comment()
+void
+Scanner::skip_slash_star_comment()
 {
 	size_t depth = 1;
 	while (depth > 0) {
@@ -176,7 +191,8 @@ void Scanner::skip_slash_star_comment()
 	}
 }
 
-void Scanner::add_string_literal()
+void
+Scanner::add_string_literal()
 {
 	while (peek() != '"' && !is_at_end()) {
 		if (peek() == '\n') {
@@ -192,11 +208,12 @@ void Scanner::add_string_literal()
 
 	advance(); // Consume the closing quote.
 
-	const std::string value = get_source().substr(m_start + 1, m_current - m_start - 2);
-	add_token(TokenType::STRING, value);
+	std::string value = get_source().substr(m_start + 1, m_current - m_start - 2);
+	add_token(TokenType::STRING, Value(value));
 }
 
-void Scanner::add_number_literal()
+void
+Scanner::add_number_literal()
 {
 	while (is_digit(peek())) {
 		advance();
@@ -209,10 +226,11 @@ void Scanner::add_number_literal()
 		}
 	}
 	const double value = std::stod(get_source().substr(m_start, m_current - m_start));
-	add_token(TokenType::NUMBER, value);
+	add_token(TokenType::NUMBER, Value(value));
 }
 
-void Scanner::add_identifier()
+void
+Scanner::add_identifier()
 {
 	while (is_alpha_numeric(peek())) {
 		advance();
@@ -229,23 +247,26 @@ void Scanner::add_identifier()
 // =====================================================================================================================
 // Static methods.
 
-bool Scanner::is_digit(const char ch) // NOLINT(readability-identifier-length)
+bool
+Scanner::is_digit(const char ch) // NOLINT(readability-identifier-length)
 {
 	return ch >= '0' && ch <= '9';
 }
 
-bool Scanner::is_alpha(const char ch) // NOLINT(readability-identifier-length)
+bool
+Scanner::is_alpha(const char ch) // NOLINT(readability-identifier-length)
 {
 	return (ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z') || ch == '_';
 }
 
-bool Scanner::is_alpha_numeric(const char ch) // NOLINT(readability-identifier-length)
+bool
+Scanner::is_alpha_numeric(const char ch) // NOLINT(readability-identifier-length)
 {
 	return is_alpha(ch) || is_digit(ch);
 }
 
 // clang-format off
-IGNORE_WARNING_BEGIN(-Wexit-time-destructors)
+IGNORE_WARNING_BEGIN("-Wexit-time-destructors")
 const std::unordered_map<std::string, TokenType>& Scanner::keyword_map()
 {
 	static const std::unordered_map<std::string, TokenType> keywords = {

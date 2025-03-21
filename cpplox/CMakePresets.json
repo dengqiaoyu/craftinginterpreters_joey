@@ -2,12 +2,14 @@
 	"version": 8,
 	"configurePresets": [
 		{
-			"name": "debug",
+			"name": "debug-clang-make",
+			"displayName": "Debug (Clang + Make)",
+			"generator": "Unix Makefiles",
 			"binaryDir": "${sourceDir}/build/${presetName}",
 			"cacheVariables": {
-				"CMAKE_C_COMPILER": "/usr/bin/clang",
-				"CMAKE_CXX_COMPILER": "/usr/bin/clang++",
 				"CMAKE_BUILD_TYPE": "Debug",
+				"CMAKE_C_COMPILER": "clang",
+				"CMAKE_CXX_COMPILER": "clang++",
 				"CMAKE_EXPORT_COMPILE_COMMANDS": "ON"
 			}
 		}
@@ -15,7 +17,7 @@
 	"buildPresets": [
 		{
 			"name": "build-all",
-			"configurePreset": "debug"
+			"configurePreset": "debug-clang-make"
 		}
 	]
 }

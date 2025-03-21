@@ -14,34 +14,53 @@
 	} while (false)
 // NOLINTEND(cppcoreguidelines-avoid-do-while)
 
-#define PRAGMA_WITH_STRINGIZED_ARGUMENT(ARG) _Pragma(#ARG)
+// =====================================================================================================================
+// Ignore Warning Macros:
+// The following macros are used to ignore specific warnings in the code.
 
-#define IGNORE_WARNING_BEGIN(WARNING)                                                                                  \
-	_Pragma("clang diagnostic push") PRAGMA_WITH_STRINGIZED_ARGUMENT(clang diagnostic ignored #WARNING)
+// _Pragma can only accept a single string literal argument, so we need to use this macro to concatenate the argument.
+#define DO_PRAGMA(x) _Pragma(#x)
 
-#define IGNORE_WARNING_ADD(WARNING) PRAGMA_WITH_STRINGIZED_ARGUMENT(clang diagnostic ignored #WARNING)
+#define PUSH_DIAGNOSTIC()					   DO_PRAGMA(clang diagnostic push)
+#define IGNORE_DIAGNOSTIC(DIAGNOSTIC_FLAG_STR) DO_PRAGMA(clang diagnostic ignored DIAGNOSTIC_FLAG_STR)
+#define POP_DIAGNOSTIC()					   DO_PRAGMA(clang diagnostic pop)
 
-#define IGNORE_WARNING_END() _Pragma("clang diagnostic pop")
+#define IGNORE_WARNING_ADD(WARNING_FLAG_STR)	   IGNORE_DIAGNOSTIC(WARNING_FLAG_STR)
+#define IGNORE_WARNING_BEGIN_1(W1)				   PUSH_DIAGNOSTIC() IGNORE_WARNING_ADD(W1)
+#define IGNORE_WARNING_BEGIN_2(W1, W2)			   IGNORE_WARNING_BEGIN_1(W1) IGNORE_WARNING_ADD(W2)
+#define IGNORE_WARNING_BEGIN_3(W1, W2, W3)		   IGNORE_WARNING_BEGIN_2(W1, W2) IGNORE_WARNING_ADD(W3)
+#define IGNORE_WARNING_BEGIN_4(W1, W2, W3, W4)	   IGNORE_WARNING_BEGIN_3(W1, W2, W3) IGNORE_WARNING_ADD(W4)
+#define IGNORE_WARNING_BEGIN_5(W1, W2, W3, W4, W5) IGNORE_WARNING_BEGIN_4(W1, W2, W3, W4) IGNORE_WARNING_ADD(W5)
 
-// clang-format off
-#define ignore_warning_begin(WARNING)                                                                                  \
-	IGNORE_WARNING_BEGIN(WARNING)                                                                                      \
+#define COUNT_ARGS_SELECT(_1, _2, _3, _4, _5, N, ...) N
+#define COUNT_ARGS(...)								  COUNT_ARGS_SELECT(__VA_ARGS__, 5, 4, 3, 2, 1)
+
+#define SELECT_MACRO_EXPANDER(name, count) name##count
+#define SELECT_MACRO(name, count)		   SELECT_MACRO_EXPANDER(name, count)
+
+// The main macro for multiple warning suppression
+#define IGNORE_WARNING_BEGIN(...) SELECT_MACRO(IGNORE_WARNING_BEGIN_, COUNT_ARGS(__VA_ARGS__))(__VA_ARGS__)
+#define IGNORE_WARNING_END()	  POP_DIAGNOSTIC()
+
+// =====================================================================================================================
+
+#define ignore_warning_begin(...)                                                                                      \
+	IGNORE_WARNING_BEGIN(__VA_ARGS__)                                                                                  \
 	EMPTY_DO_WHILE()
 
-#define ignore_warning_add(WARNING)                                                                                     \
-	IGNORE_WARNING_ADD(WARNING)                                                                                         \
+#define ignore_warning_add(...)                                                                                        \
+	IGNORE_WARNING_ADD(__VA_ARGS__)                                                                                    \
 	EMPTY_DO_WHILE()
 
 #define ignore_warning_end()                                                                                           \
 	IGNORE_WARNING_END()                                                                                               \
 	EMPTY_DO_WHILE()
 
+// =====================================================================================================================
+
 #define CLASS_PADDING(BYTES)                                                                                           \
-	IGNORE_WARNING_BEGIN(-Wzero-length-array)                                                                          \
-	IGNORE_WARNING_ADD(-Wunused-private-field)                                                                         \
-	std::array<char, (BYTES)> _unused_padding = {}                                                                     \
-	IGNORE_WARNING_END()
-// clang-format on
+	IGNORE_WARNING_BEGIN("-Wzero-length-array", "-Wunused-private-field")                                              \
+	std::array<char, (BYTES)> _unused_padding = {} IGNORE_WARNING_END()
 
 #ifndef require_action_return
 	// NOLINTBEGIN(cppcoreguidelines-avoid-do-while)
@@ -81,12 +100,10 @@
 // NOLINTBEGIN(cppcoreguidelines-avoid-c-arrays, hicpp-avoid-c-arrays, modernize-avoid-c-arrays)
 
 template <typename... Args>
-inline std::string fmt_str(const char* fmt, Args&&... args)
+inline std::string
+fmt_str(const char* fmt, Args&&... args)
 {
-	// clang-format off
-	ignore_warning_begin(-Wformat-nonliteral);
-	ignore_warning_add(-Wformat-security);
-	// clang-format on
+	ignore_warning_begin("-Wformat-nonliteral", "-Wformat-security");
 
 	const int size = std::snprintf(nullptr, 0, fmt, std::forward<Args>(args)...);
 	require_throw(size >= 0, std::runtime_error("Error during formatting -- format: " + std::string(fmt)));
