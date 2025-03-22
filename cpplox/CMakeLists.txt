@@ -59,15 +59,18 @@ add_executable(cpplox ${COMMON_SOURCES} ${CPPLOX_SOURCES})
 # ======================================================================================================================
 # Target: ast_module_generator
 set(AST_MODULE_GENERATOR_SOURCES
-	src/tools/ast_module_generator.cpp
+	src/tools/ast_module_generator/ast_module_generator.cpp
 )
 
 add_executable(ast_module_generator ${AST_MODULE_GENERATOR_SOURCES})
 
 # ======================================================================================================================
-# Target: ast_printer
-set(AST_PRINTER_SOURCES
-	src/tools/ast_printer.cpp
+# Target: visitor_examples
+set(VISITOR_EXAMPLES_SOURCES
+	src/visitors/examples/ast_printer.cpp
+	src/visitors/examples/rpn_printer.cpp
+
+	src/tools/visitor_examples/visitor_examples.cpp
 )
 
-add_executable(ast_printer ${COMMON_SOURCES} ${AST_PRINTER_SOURCES})
+add_executable(visitor_examples ${COMMON_SOURCES} ${VISITOR_EXAMPLES_SOURCES})

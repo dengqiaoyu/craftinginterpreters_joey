@@ -30,7 +30,7 @@ private:
 };
 
 template <>
-struct std::formatter<Token> : std::formatter<std::string> {
+struct std::formatter<Token> : std::formatter<std::string> { // NOLINT(altera-struct-pack-align)
 	auto format(const Token& token, format_context& ctx) const
 	{
 		return std::formatter<std::string>::format(token.to_string(), ctx);

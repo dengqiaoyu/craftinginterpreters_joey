@@ -141,7 +141,7 @@ operator<<(std::ostream& out_s, const Expr<R>& expr)
 
 // Formatter specialization for Expr
 template <typename R>
-struct std::formatter<Expr<R>> : std::formatter<std::string> // NOLINT(altera-struct-pack-align)
+struct std::formatter<Expr<R>> : std::formatter<std::string> // NOLINT(altera-struct-pack-align, cert-dcl58-cpp)
 {
 	auto format(const Expr<R>& expr, format_context& ctx) const
 	{
