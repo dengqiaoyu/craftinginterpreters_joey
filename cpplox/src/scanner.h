@@ -1,6 +1,7 @@
 #ifndef SCANNER_H
 #define SCANNER_H
 
+#include <concepts>
 #include <cstddef>
 #include <string>
 #include <type_traits>
@@ -33,11 +34,12 @@ private:
 
 	void add_token(TokenType type);
 
-	template <typename Value_T, typename = std::enable_if_t<std::is_convertible_v<Value_T, Value>>>
-	void add_token(TokenType type, Value_T&& literal)
+	template <typename T_Value>
+		requires std::convertible_to<T_Value, Value>
+	void add_token(TokenType type, T_Value&& literal)
 	{
 		std::string lexeme = get_source().substr(m_start, m_current - m_start);
-		m_tokens.emplace_back(type, m_line, std::forward<Value_T>(literal), std::move(lexeme));
+		m_tokens.emplace_back(type, m_line, std::forward<T_Value>(literal), std::move(lexeme));
 	}
 
 	[[nodiscard]] char peek() const;

@@ -2,6 +2,7 @@
 
 #include <cstddef>
 #include <cstdlib>
+#include <format>
 #include <fstream>
 #include <ios>
 #include <iostream>
@@ -13,7 +14,8 @@
 #include "general.h"
 #include "scanner.h"
 
-void Lox::run_file(const std::string& path)
+void
+Lox::run_file(const std::string& path)
 {
 	std::ifstream file(path, std::ios::binary);
 	require_throw(file, std::ios_base::failure("Failed to open file: " + path));
@@ -29,7 +31,8 @@ void Lox::run_file(const std::string& path)
 	}
 }
 
-void Lox::run_prompt()
+void
+Lox::run_prompt()
 {
 	std::string line;
 
@@ -43,18 +46,39 @@ void Lox::run_prompt()
 	}
 }
 
-bool Lox::m_had_error = false;
-void Lox::error(const size_t line, const std::string& message)
+void
+Lox::error(const size_t line, const std::string& message)
 {
-	m_had_error = true;
-	std::cout << "[line " << line << "] Error: " << message << std::endl;
+	report(line, "", message);
 }
 
-void Lox::run(const std::string& content)
+void
+Lox::error(const Token& token, const std::string& message)
+{
+	if (token.get_type() == TokenType::END_OF_FILE) {
+		report(token.get_line(), " at end", message);
+	} else {
+		report(token.get_line(), std::format("at '{}'", token.get_lexeme()), message);
+	}
+}
+
+// =====================================================================================================================
+// Private methods.
+
+void
+Lox::run(const std::string& content)
 {
 	const Scanner scanner(content);
 	const std::vector<Token>& tokens = scanner.get_tokens();
 	for (const Token& token : tokens) {
 		std::cout << token << std::endl;
 	}
+}
+
+bool Lox::m_had_error = false;
+void
+Lox::report(const size_t line, const std::string& where, const std::string& message)
+{
+	std::cout << std::format("[line {}] Error {}: {}\n", line, where, message);
+	m_had_error = true;
 }

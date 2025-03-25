@@ -58,6 +58,18 @@
 
 // =====================================================================================================================
 
+/*
+ *	@brief
+ *		Ignore the unused variable warning.
+ */
+#if defined(__GNUC__) || defined(__clang__)
+	#define UNUSED [[maybe_unused]]
+#else
+	#define UNUSED
+#endif
+
+// =====================================================================================================================
+
 #define CLASS_PADDING(BYTES)                                                                                           \
 	IGNORE_WARNING_BEGIN("-Wzero-length-array", "-Wunused-private-field")                                              \
 	std::array<char, (BYTES)> _unused_padding = {} IGNORE_WARNING_END()
@@ -74,6 +86,19 @@
 	// NOLINTEND(cppcoreguidelines-avoid-do-while)
 #endif
 
+/*
+ *	@brief
+ *		Require that a condition is true, otherwise throw an exception.
+ *
+ *	@param condition
+ *		The condition to check.
+ *
+ *	@param action
+ *		The action to take if the condition is false.
+ *
+ *	@param ret
+ *		The return value if the condition is false.
+ */
 #ifndef require_action_return_value
 	// NOLINTBEGIN(cppcoreguidelines-avoid-do-while)
 	#define require_action_return_value(condition, action, ret)                                                        \
@@ -84,6 +109,20 @@
 			}                                                                                                          \
 		} while (0)
 	// NOLINTEND(cppcoreguidelines-avoid-do-while)
+#endif
+
+/*
+ *	@brief
+ *		Require that a condition is true, otherwise throw an exception.
+ *
+ *	@param condition
+ *		The condition to check.
+ *
+ *	@param ret
+ *		The return value if the condition is false.
+ */
+#ifndef require_return_value
+	#define require_return_value(condition, ret) require_action_return_value(condition, EMPTY_DO_WHILE(), ret)
 #endif
 
 #ifndef require_throw

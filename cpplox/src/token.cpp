@@ -1,5 +1,7 @@
 #include "token.h"
+#include "token_type.h"
 
+#include <cstddef>
 #include <format>
 
 Token::Token(TokenType type, std::string lexeme) : m_line(1), m_lexeme(std::move(lexeme)), m_type(type)
@@ -24,10 +26,28 @@ Token::to_string() const
 	return std::format("Token{{type={}, line={}, lexeme={}, literal={}}}", m_type, m_line, m_lexeme, m_literal);
 }
 
+size_t
+Token::get_line() const
+{
+	return m_line;
+}
+
 std::string
 Token::get_lexeme() const
 {
 	return m_lexeme;
+}
+
+Value
+Token::get_literal() const
+{
+	return m_literal;
+}
+
+TokenType
+Token::get_type() const
+{
+	return m_type;
 }
 
 std::ostream&

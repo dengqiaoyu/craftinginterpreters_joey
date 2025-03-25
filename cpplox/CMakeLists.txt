@@ -51,6 +51,7 @@ set(COMMON_SOURCES
 # ======================================================================================================================
 # Target: cpplox
 set(CPPLOX_SOURCES
+	src/parser.cpp
 	src/main.cpp
 )
 

@@ -19,7 +19,10 @@ public:
 
 	friend std::ostream& operator<<(std::ostream& output_s, const Token& token);
 
+	[[nodiscard]] size_t get_line() const;
 	[[nodiscard]] std::string get_lexeme() const;
+	[[nodiscard]] Value get_literal() const;
+	[[nodiscard]] TokenType get_type() const;
 
 private:
 	size_t m_line;
