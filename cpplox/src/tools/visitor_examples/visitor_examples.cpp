@@ -14,26 +14,26 @@ main(const int argc, const char* const argv[])
 
 	// clang-format off
 	// -123 * (45.67)
-	auto expr_0 = std::make_shared<Binary<std::string>>(
-		std::make_shared<Unary<std::string>>(
-			Token(TokenType::MINUS, "-"), std::make_shared<Literal<std::string>>(Value(123))),
+	std::shared_ptr<Binary> expr_0 = std::make_shared<Binary>(
+		std::make_shared<Unary>(
+			Token(TokenType::MINUS, "-"), std::make_shared<Literal>(Value(123))),
 		Token(TokenType::STAR, "*"),
-		std::make_shared<Grouping<std::string>>(std::make_shared<Literal<std::string>>(Value(45.67))));
+		std::make_shared<Grouping>(std::make_shared<Literal>(Value(45.67))));
 
 	// (-1 + 2) * (4 - 3)
-	auto expr_1 = std::make_shared<Binary<std::string>>(
-		std::make_shared<Grouping<std::string>>(
-			std::make_shared<Binary<std::string>>(
-				std::make_shared<Unary<std::string>>(
-					Token(TokenType::MINUS, "-"), std::make_shared<Literal<std::string>>(Value(1))),
+	std::shared_ptr<Binary> expr_1 = std::make_shared<Binary>(
+		std::make_shared<Grouping>(
+			std::make_shared<Binary>(
+				std::make_shared<Unary>(
+					Token(TokenType::MINUS, "-"), std::make_shared<Literal>(Value(1))),
 				Token(TokenType::PLUS, "+"),
-				std::make_shared<Literal<std::string>>(Value(2)))),
+				std::make_shared<Literal>(Value(2)))),
 		Token(TokenType::STAR, "*"),
-		std::make_shared<Grouping<std::string>>(
-			std::make_shared<Binary<std::string>>(
-				std::make_shared<Literal<std::string>>(Value(4)),
+		std::make_shared<Grouping>(
+			std::make_shared<Binary>(
+				std::make_shared<Literal>(Value(4)),
 				Token(TokenType::MINUS, "-"),
-				std::make_shared<Literal<std::string>>(Value(3)))));
+				std::make_shared<Literal>(Value(3)))));
 
 	// clang-format on
 

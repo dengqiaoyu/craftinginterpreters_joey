@@ -2,6 +2,7 @@
 #define GENERAL_H
 
 #include <array> // IWYU pragma: keep
+#include <cassert>
 #include <cstdarg>
 #include <cstdio>
 #include <stdexcept>
@@ -113,6 +114,28 @@
 
 /*
  *	@brief
+ *		Require that a condition is true, otherwise return.
+ *
+ *	@param condition
+ *		The condition to check.
+ */
+#ifndef require_return
+	#define require_return(condition) require_action_return(condition, EMPTY_DO_WHILE())
+#endif
+
+/*
+ *	@brief
+ *		Require that a pointer is not null, otherwise return.
+ *
+ *	@param ptr
+ *		The pointer to check.
+ */
+#ifndef require_nonnull_return
+	#define require_nonnull_return(ptr) require_return((ptr) != nullptr)
+#endif
+
+/*
+ *	@brief
  *		Require that a condition is true, otherwise throw an exception.
  *
  *	@param condition
@@ -134,6 +157,17 @@
 			}                                                                                                          \
 		} while (0)
 	// NOLINTEND(cppcoreguidelines-avoid-do-while)
+#endif
+
+/*
+ *	@brief
+ *		Require that a condition is true, otherwise throw an exception.
+ *
+ *	@param condition
+ *		The condition to check.
+ */
+#ifndef require_assert
+	#define require_assert(condition) assert((condition) && "assertion violated: " #condition)
 #endif
 
 // NOLINTBEGIN(cppcoreguidelines-avoid-c-arrays, hicpp-avoid-c-arrays, modernize-avoid-c-arrays)

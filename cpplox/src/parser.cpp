@@ -6,10 +6,155 @@
 #include "lox.h"
 #include "token.h"
 
-Parser::ParserError::~ParserError() = default;
+namespace {
+
+class ParserError : public std::runtime_error // NOLINT(hicpp-special-member-functions,
+											  // cppcoreguidelines-special-member-functions)
+{
+public:
+	explicit ParserError(const std::string& message) : std::runtime_error(message)
+	{
+		// Empty constructor.
+	}
+	~ParserError() override;
+};
+
+ParserError
+error(const Token& token, const std::string& message)
+{
+	Lox::error(token, message);
+	return ParserError(message);
+}
+
+} // namespace
+
+// =====================================================================================================================
+// Public methods.
+
+std::shared_ptr<Expr>
+Parser::parse()
+{
+	try {
+		return comma_expression();
+	} catch (UNUSED const ParserError& error) {
+		return nullptr;
+	}
+}
 
 // =====================================================================================================================
 // Private methods.
+
+// <comma_expression> -> <expression> ( "," <expression> )*
+std::shared_ptr<Expr>
+Parser::comma_expression() // NOLINT(misc-no-recursion)
+{
+	std::shared_ptr<Expr> expr = expression();
+	while (match(TokenType::COMMA)) {
+		const Token& comma_opr = previous();
+		std::shared_ptr<Expr> right = expression();
+		expr = std::make_shared<Binary>(expr, comma_opr, right);
+	}
+	return expr;
+}
+
+// <expression> -> <equality>
+std::shared_ptr<Expr>
+Parser::expression() // NOLINT(misc-no-recursion)
+{
+	return equality();
+}
+
+// <equality> -> <comparison> ( ( "!=" | "==" ) <comparison> )*
+std::shared_ptr<Expr>
+Parser::equality() // NOLINT(misc-no-recursion)
+{
+	// Think about `a == b == c == d == e`.
+	std::shared_ptr<Expr> expr = comparison();
+	while (match(TokenType::BANG_EQUAL, TokenType::EQUAL_EQUAL)) {
+		const Token& eq_opr = previous();
+		std::shared_ptr<Expr> right = comparison();
+		expr = std::make_shared<Binary>(expr, eq_opr, right);
+	}
+	return expr;
+}
+
+// <comparison> -> <term> ( ( ">" | ">=" | "<" | "<=" ) <term> )*
+std::shared_ptr<Expr>
+Parser::comparison() // NOLINT(misc-no-recursion)
+{
+	std::shared_ptr<Expr> expr = term();
+	while (match(TokenType::GREATER, TokenType::GREATER_EQUAL, TokenType::LESS, TokenType::LESS_EQUAL)) {
+		const Token& cmp_opr = previous();
+		std::shared_ptr<Expr> right = term();
+		expr = std::make_shared<Binary>(expr, cmp_opr, right);
+	}
+	return expr;
+}
+
+// <term> -> <factor> ( ( "-" | "+" ) <factor> )*
+std::shared_ptr<Expr>
+Parser::term() // NOLINT(misc-no-recursion)
+{
+	std::shared_ptr<Expr> expr = factor();
+	while (match(TokenType::MINUS, TokenType::PLUS)) {
+		const Token& add_opr = previous();
+		std::shared_ptr<Expr> right = factor();
+		expr = std::make_shared<Binary>(expr, add_opr, right);
+	}
+	return expr;
+}
+
+// <factor> -> <unary> ( ( "/" | "*" ) <unary> )*
+std::shared_ptr<Expr>
+Parser::factor() // NOLINT(misc-no-recursion)
+{
+	std::shared_ptr<Expr> expr = unary();
+	while (match(TokenType::SLASH, TokenType::STAR)) {
+		const Token& mul_opr = previous();
+		std::shared_ptr<Expr> right = unary();
+		expr = std::make_shared<Binary>(expr, mul_opr, right);
+	}
+	return expr;
+}
+
+// <unary> -> ( "!" | "-" ) <unary> | <primary>
+std::shared_ptr<Expr>
+Parser::unary() // NOLINT(misc-no-recursion)
+{
+	if (match(TokenType::BANG, TokenType::MINUS)) {
+		const Token& unary_opr = previous();
+		std::shared_ptr<Expr> right = unary();
+		return std::make_shared<Unary>(unary_opr, right);
+	}
+	return primary();
+}
+
+// <primary> -> NUMBER | STRING | "true" | "false" | "nil" | "(" <comma_expression> ")"
+std::shared_ptr<Expr>
+Parser::primary() // NOLINT(misc-no-recursion)
+{
+	if (match(TokenType::FALSE)) {
+		return std::make_shared<Literal>(Value(false));
+	}
+	if (match(TokenType::TRUE)) {
+		return std::make_shared<Literal>(Value(true));
+	}
+	if (match(TokenType::NIL)) {
+		return std::make_shared<Literal>(Value());
+	}
+	if (match(TokenType::NUMBER, TokenType::STRING)) {
+		return std::make_shared<Literal>(previous().get_literal());
+	}
+	if (match(TokenType::LEFT_PAREN)) {
+		std::shared_ptr<Expr> comma_expr = comma_expression();
+		consume(TokenType::RIGHT_PAREN, "Expect ')' after expression.");
+		return std::make_shared<Grouping>(comma_expr);
+	}
+
+	throw error(peek(), "Expect expression.");
+}
+
+ParserError::~ParserError() = default;
 
 const std::vector<Token>&
 Parser::get_tokens() const
@@ -61,14 +206,16 @@ Parser::synchronize()
 bool
 Parser::check(const TokenType type) const
 {
-	require_return_value(is_at_end(), false);
-	return peek().get_type() == type;
+	require_return_value(!is_at_end(), false);
+	const Token& token = peek();
+	return token.get_type() == type;
 }
 
 bool
 Parser::is_at_end() const
 {
-	return peek().get_type() == TokenType::END_OF_FILE;
+	const Token& token = peek();
+	return token.get_type() == TokenType::END_OF_FILE;
 }
 
 const Token&
@@ -81,11 +228,4 @@ const Token&
 Parser::previous() const
 {
 	return get_tokens().at(current - 1);
-}
-
-Parser::ParserError
-Parser::error(const Token& token, const std::string& message)
-{
-	Lox::error(token, message);
-	return ParserError(message);
 }

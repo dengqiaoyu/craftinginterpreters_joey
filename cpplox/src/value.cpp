@@ -3,6 +3,26 @@
 #include <stdexcept>
 #include <variant>
 
+namespace {
+
+void
+remove_trailing_zeros(std::string& str)
+{
+	const size_t dot_pos = str.find('.');
+	if (dot_pos != std::string::npos) {
+		size_t end = str.size() - 1;
+		while (str[end] == '0') {
+			--end;
+		}
+		if (str[end] == '.') {
+			--end;
+		}
+		str = str.substr(0, end + 1);
+	}
+}
+
+} // namespace
+
 // Constructors
 
 Value::Value() : m_type(ValueType::NIL) {}
@@ -77,7 +97,9 @@ Value::to_string() const
 			} else if constexpr (std::is_same_v<T, int>) {
 				return std::to_string(arg);
 			} else if constexpr (std::is_same_v<T, double>) {
-				return std::to_string(arg);
+				std::string str = std::to_string(arg);
+				remove_trailing_zeros(str);
+				return str;
 			} else if constexpr (std::is_same_v<T, std::string>) {
 				return arg;
 			} else {

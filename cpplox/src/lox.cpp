@@ -12,7 +12,10 @@
 #include <vector>
 
 #include "general.h"
+#include "parser.h"
 #include "scanner.h"
+#include "utilities/lox_readline.h"
+#include "visitors/examples/ast_printer.h"
 
 void
 Lox::run_file(const std::string& path)
@@ -34,12 +37,17 @@ Lox::run_file(const std::string& path)
 void
 Lox::run_prompt()
 {
-	std::string line;
+	LoxReadline lox_readline;
 
 	while (true) {
-		std::cout << "> ";
-		if (!std::getline(std::cin, line)) {
+		auto [line, is_eof] = LoxReadline::read_line("> ");
+		// Check for EOF (Ctrl+D) or error.
+		if (is_eof || line == "exit" || line == "quit") {
 			break;
+		}
+		// Ignore empty lines.
+		if (line.empty()) {
+			continue;
 		}
 		run(line);
 		m_had_error = false;
@@ -70,9 +78,14 @@ Lox::run(const std::string& content)
 {
 	const Scanner scanner(content);
 	const std::vector<Token>& tokens = scanner.get_tokens();
-	for (const Token& token : tokens) {
-		std::cout << token << std::endl;
-	}
+
+	Parser parser(tokens);
+	const std::shared_ptr<Expr> expr = parser.parse();
+	require_nonnull_return(expr);
+
+	std::cout << "Parsed expression: " << std::endl;
+	AstPrinter astPrinter;
+	std::cout << astPrinter.convert_string(*expr) << std::endl;
 }
 
 bool Lox::m_had_error = false;
