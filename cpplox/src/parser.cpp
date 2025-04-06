@@ -48,11 +48,27 @@ Parser::parse()
 std::shared_ptr<Expr>
 Parser::comma_expression() // NOLINT(misc-no-recursion)
 {
-	std::shared_ptr<Expr> expr = expression();
+	std::shared_ptr<Expr> expr = conditional_expression();
 	while (match(TokenType::COMMA)) {
 		const Token& comma_opr = previous();
-		std::shared_ptr<Expr> right = expression();
+		std::shared_ptr<Expr> right = conditional_expression();
 		expr = std::make_shared<Binary>(expr, comma_opr, right);
+	}
+	return expr;
+}
+
+// conditional_expression	-> expression ? expression : conditional_expression:
+// 							| expression
+std::shared_ptr<Expr>
+Parser::conditional_expression() // NOLINT(misc-no-recursion)
+{
+	std::shared_ptr<Expr> expr = expression();
+	if (match(TokenType::QUESTION)) {
+		const Token& qmark = previous();
+		std::shared_ptr<Expr> then_branch = expression();
+		consume(TokenType::COLON, "Expect ':' after expression.");
+		std::shared_ptr<Expr> else_branch = conditional_expression();
+		expr = std::make_shared<Ternary>(expr, qmark, then_branch, previous(), else_branch);
 	}
 	return expr;
 }

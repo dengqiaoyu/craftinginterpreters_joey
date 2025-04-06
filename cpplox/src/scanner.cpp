@@ -64,7 +64,9 @@ Scanner::scan_token()
 	case '.': add_token(TokenType::DOT); break;
 	case '-': add_token(TokenType::MINUS); break;
 	case '+': add_token(TokenType::PLUS); break;
+	case ':': add_token(TokenType::COLON); break;
 	case ';': add_token(TokenType::SEMICOLON); break;
+	case '?': add_token(TokenType::QUESTION); break;
 	case '*': add_token(TokenType::STAR); break;
 
 	// Two-character tokens.

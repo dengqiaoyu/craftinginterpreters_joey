@@ -1,7 +1,5 @@
 #include "expr.h"
 
-#include "general.h"
-
 // =====================================================================================================================
 // visitor
 Visitor::~Visitor() = default;
@@ -21,8 +19,7 @@ operator<<(std::ostream& out_s, const Expr& expr)
 template <>
 struct std::formatter<Expr> : std::formatter<std::string> // NOLINT(altera-struct-pack-align)
 {
-	auto
-	format(const Expr& expr, format_context& ctx) const
+	auto format(const Expr& expr, format_context& ctx) const
 	{
 		return std::formatter<std::string>::format(expr.to_string(), ctx);
 	}
@@ -35,12 +32,6 @@ Binary::Binary(std::shared_ptr<const Expr> left, Token opr, std::shared_ptr<cons
 	: m_left(std::move(left)), m_opr(std::move(opr)), m_right(std::move(right))
 {
 	// Empty constructor.
-}
-
-std::string
-Binary::to_string() const
-{
-	return fmt_str("Binary Expr{left=%s, opr=%s, right=%s}", m_left->to_string().c_str(), m_opr.to_string().c_str(), m_right->to_string().c_str());
 }
 
 const std::shared_ptr<const Expr>&
@@ -67,19 +58,74 @@ Binary::accept(const Visitor& visitor) const
 	return visitor.visit_binary_expr(*this);
 }
 
-// =====================================================================================================================
-// Grouping
+std::string
+Binary::to_string() const
+{
+	return std::format("Binary Expr{{left={}, opr={}, right={}}}", m_left->to_string(), m_opr.to_string(),
+		m_right->to_string());
+}
 
-Grouping::Grouping(std::shared_ptr<const Expr> expr)
-	: m_expr(std::move(expr))
+// =====================================================================================================================
+// Ternary
+
+Ternary::Ternary(std::shared_ptr<const Expr> condition, Token qmark, std::shared_ptr<const Expr> then_branch,
+	Token colon, std::shared_ptr<const Expr> else_branch)
+	: m_condition(std::move(condition)), m_qmark(std::move(qmark)), m_then_branch(std::move(then_branch)),
+	  m_colon(std::move(colon)), m_else_branch(std::move(else_branch))
 {
 	// Empty constructor.
 }
 
-std::string
-Grouping::to_string() const
+const std::shared_ptr<const Expr>&
+Ternary::get_condition() const
 {
-	return fmt_str("Grouping Expr{expr=%s}", m_expr->to_string().c_str());
+	return m_condition;
+}
+
+const Token&
+Ternary::get_qmark() const
+{
+	return m_qmark;
+}
+
+const std::shared_ptr<const Expr>&
+Ternary::get_then_branch() const
+{
+	return m_then_branch;
+}
+
+const Token&
+Ternary::get_colon() const
+{
+	return m_colon;
+}
+
+const std::shared_ptr<const Expr>&
+Ternary::get_else_branch() const
+{
+	return m_else_branch;
+}
+
+std::any
+Ternary::accept(const Visitor& visitor) const
+{
+	return visitor.visit_ternary_expr(*this);
+}
+
+std::string
+Ternary::to_string() const
+{
+	return std::format("Ternary Expr{{condition={}, qmark={}, then_branch={}, colon={}, else_branch={}}}",
+		m_condition->to_string(), m_qmark.to_string(), m_then_branch->to_string(), m_colon.to_string(),
+		m_else_branch->to_string());
+}
+
+// =====================================================================================================================
+// Grouping
+
+Grouping::Grouping(std::shared_ptr<const Expr> expr) : m_expr(std::move(expr))
+{
+	// Empty constructor.
 }
 
 const std::shared_ptr<const Expr>&
@@ -94,19 +140,18 @@ Grouping::accept(const Visitor& visitor) const
 	return visitor.visit_grouping_expr(*this);
 }
 
+std::string
+Grouping::to_string() const
+{
+	return std::format("Grouping Expr{{expr={}}}", m_expr->to_string());
+}
+
 // =====================================================================================================================
 // Literal
 
-Literal::Literal(Value value)
-	: m_value(std::move(value))
+Literal::Literal(Value value) : m_value(std::move(value))
 {
 	// Empty constructor.
-}
-
-std::string
-Literal::to_string() const
-{
-	return fmt_str("Literal Expr{value=%s}", m_value.to_string().c_str());
 }
 
 const Value&
@@ -121,19 +166,18 @@ Literal::accept(const Visitor& visitor) const
 	return visitor.visit_literal_expr(*this);
 }
 
+std::string
+Literal::to_string() const
+{
+	return std::format("Literal Expr{{value={}}}", m_value.to_string());
+}
+
 // =====================================================================================================================
 // Unary
 
-Unary::Unary(Token opr, std::shared_ptr<const Expr> right)
-	: m_opr(std::move(opr)), m_right(std::move(right))
+Unary::Unary(Token opr, std::shared_ptr<const Expr> right) : m_opr(std::move(opr)), m_right(std::move(right))
 {
 	// Empty constructor.
-}
-
-std::string
-Unary::to_string() const
-{
-	return fmt_str("Unary Expr{opr=%s, right=%s}", m_opr.to_string().c_str(), m_right->to_string().c_str());
 }
 
 const Token&
@@ -154,3 +198,8 @@ Unary::accept(const Visitor& visitor) const
 	return visitor.visit_unary_expr(*this);
 }
 
+std::string
+Unary::to_string() const
+{
+	return std::format("Unary Expr{{opr={}, right={}}}", m_opr.to_string(), m_right->to_string());
+}

@@ -23,6 +23,16 @@ RpnPrinter::visit_binary_expr(const Binary& expr) const
 // =====================================================================================================================
 
 std::any
+RpnPrinter::visit_ternary_expr(const Ternary& expr) const
+{
+	return std::format("{} {} {} {}", std::any_cast<std::string>(expr.get_condition()->accept(*this)),
+		std::any_cast<std::string>(expr.get_then_branch()->accept(*this)),
+		std::any_cast<std::string>(expr.get_else_branch()->accept(*this)), "<ternary>");
+}
+
+// =====================================================================================================================
+
+std::any
 RpnPrinter::visit_grouping_expr(const Grouping& expr) const
 {
 	return expr.get_expr()->accept(*this);

@@ -32,19 +32,22 @@ private:
 	/*
 	 * Grammar:
 	 *
-	 * comma_expression	→ expression ( "," expression )* ;
-	 * expression		→ equality ;
-	 * equality			→ comparison ( ( "!=" | "==" ) comparison )* ;
-	 * comparison		→ term ( ( ">" | ">=" | "<" | "<=" ) term )* ;
-	 * term				→ factor ( ( "-" | "+" ) factor )* ;
-	 * factor			→ unary ( ( "/" | "*" ) unary )* ;
-	 * unary			→ ( "!" | "-" ) unary
-	 *					| primary ;
-	 * primary			→ NUMBER | STRING | "true" | "false" | "nil"
-	 *					| "(" comma_expression ")" ;
+	 * comma_expression			-> expression ( "," expression )* ;
+	 * conditional_expression	-> expression ? expression : conditional_expression:
+	 *							| expression
+	 * expression				-> equality ;
+	 * equality					-> comparison ( ( "!=" | "==" ) comparison )* ;
+	 * comparison				-> term ( ( ">" | ">=" | "<" | "<=" ) term )* ;
+	 * term						-> factor ( ( "-" | "+" ) factor )* ;
+	 * factor					-> unary ( ( "/" | "*" ) unary )* ;
+	 * unary					-> ( "!" | "-" ) unary
+	 *							| primary ;
+	 * primary					-> NUMBER | STRING | "true" | "false" | "nil"
+	 *							| "(" comma_expression ")" ;
 	 */
 
 	std::shared_ptr<Expr> comma_expression();
+	std::shared_ptr<Expr> conditional_expression();
 	std::shared_ptr<Expr> expression();
 	std::shared_ptr<Expr> equality();
 	std::shared_ptr<Expr> comparison();

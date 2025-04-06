@@ -77,8 +77,17 @@ main(const int argc, const char* const argv[]) // NOLINT(readability-function-co
 		ASTClass("Binary",
 			{
 				{"std::shared_ptr<const Expr>",	"left"},
-				{"Token",					"opr"},
+				{"Token",						"opr"},
 				{"std::shared_ptr<const Expr>",	"right"}
+			}
+		),
+		ASTClass("Ternary",
+			{
+				{"std::shared_ptr<const Expr>",	"condition"},
+				{"Token",						"qmark"},
+				{"std::shared_ptr<const Expr>",	"then_branch"},
+				{"Token",						"colon"},
+				{"std::shared_ptr<const Expr>",	"else_branch"}
 			}
 		),
 		ASTClass("Grouping",
@@ -88,12 +97,12 @@ main(const int argc, const char* const argv[]) // NOLINT(readability-function-co
 		),
 		ASTClass("Literal",
 			{
-				{"Value", 					"value"}
+				{"Value", 						"value"}
 			}
 		),
 		ASTClass("Unary",
 			{
-				{"Token",					"opr"},
+				{"Token",						"opr"},
 				{"std::shared_ptr<const Expr>",	"right"}
 			}
 		)
@@ -149,7 +158,7 @@ main(const int argc, const char* const argv[]) // NOLINT(readability-function-co
 	hs << fmt_str("	Visitor& operator=(const Visitor&) = default;\n");
 	hs << fmt_str("	Visitor(Visitor&&) noexcept = default;\n");
 	hs << fmt_str("	Visitor& operator=(Visitor&&) noexcept = default;\n");
-	hs << fmt_str("	virtual ~Visitor() = 0;\n\n");
+	hs << fmt_str("	virtual ~Visitor();\n\n");
 
 	// Visitor methods
 	for (const auto& ast_class : ast_classes) {
@@ -204,9 +213,7 @@ main(const int argc, const char* const argv[]) // NOLINT(readability-function-co
 		hs << ");\n";
 		hs << fmt_str("\n");
 
-		hs << fmt_str("	[[nodiscard]] std::any accept(const Visitor& visitor) const override;\n");
-		hs << fmt_str("	[[nodiscard]] std::string to_string() const override;\n\n");
-
+		// Generate getters first
 		for (const auto& member : members) {
 			if (is_shared_ptr_type(member.first)) {
 				hs << fmt_str("	[[nodiscard]] const %s& get_%s() const;\n", member.first.c_str(),
@@ -216,6 +223,11 @@ main(const int argc, const char* const argv[]) // NOLINT(readability-function-co
 					member.second.c_str());
 			}
 		}
+		hs << fmt_str("\n");
+
+		// Then generate accept and to_string methods
+		hs << fmt_str("	[[nodiscard]] std::any accept(const Visitor& visitor) const override;\n");
+		hs << fmt_str("	[[nodiscard]] std::string to_string() const override;");
 		hs << "\n";
 		hs << fmt_str("private:\n");
 		for (const auto& member : members) {
@@ -244,7 +256,6 @@ main(const int argc, const char* const argv[]) // NOLINT(readability-function-co
 
 	// Includes
 	cs << fmt_str("#include \"%s\"\n\n", header_file_name.c_str());
-	cs << fmt_str("#include \"general.h\"\n\n");
 
 	// clang-format off
 	cs << fmt_str("// =====================================================================================================================\n");
@@ -309,32 +320,7 @@ main(const int argc, const char* const argv[]) // NOLINT(readability-function-co
 		cs << fmt_str("	// Empty constructor.\n");
 		cs << "}\n\n";
 
-		// to_string method
-		cs << fmt_str("std::string\n");
-		cs << fmt_str("%s::to_string() const\n", class_name.c_str());
-		cs << "{\n";
-		cs << fmt_str("	return fmt_str(\"%s Expr{", class_name.c_str());
-		for (size_t i = 0; i < members.size(); ++i) {
-			cs << fmt_str("%s=%%s", members[i].second.c_str());
-			if (i != members.size() - 1) {
-				cs << ", ";
-			}
-		}
-		cs << "}\", ";
-		for (size_t i = 0; i < members.size(); ++i) {
-			if (is_ptr_type(members[i].first)) {
-				cs << fmt_str("m_%s->to_string().c_str()", members[i].second.c_str());
-			} else {
-				cs << fmt_str("m_%s.to_string().c_str()", members[i].second.c_str());
-			}
-			if (i != members.size() - 1) {
-				cs << ", ";
-			}
-		}
-		cs << ");\n";
-		cs << "}\n\n";
-
-		// Getters
+		// Getters (moved up, after constructor)
 		for (const auto& member : members) {
 			if (is_shared_ptr_type(member.first)) {
 				cs << fmt_str("const %s&\n", member.first.c_str());
@@ -351,11 +337,36 @@ main(const int argc, const char* const argv[]) // NOLINT(readability-function-co
 			cs << "}\n\n";
 		}
 
-		// Accept method
+		// Accept method (after getters)
 		cs << fmt_str("std::any\n");
 		cs << fmt_str("%s::accept(const Visitor& visitor) const\n", class_name.c_str());
 		cs << "{\n";
 		cs << fmt_str("	return visitor.visit_%s_expr(*this);\n", tolower(class_name).c_str());
+		cs << "}\n\n";
+
+		// to_string method (moved to end)
+		cs << fmt_str("std::string\n");
+		cs << fmt_str("%s::to_string() const\n", class_name.c_str());
+		cs << "{\n";
+		cs << fmt_str("	return std::format(\"%s Expr{{", class_name.c_str());
+		for (size_t i = 0; i < members.size(); ++i) {
+			cs << fmt_str("%s={}", members[i].second.c_str());
+			if (i != members.size() - 1) {
+				cs << ", ";
+			}
+		}
+		cs << "}}\", ";
+		for (size_t i = 0; i < members.size(); ++i) {
+			if (is_ptr_type(members[i].first)) {
+				cs << fmt_str("m_%s->to_string()", members[i].second.c_str());
+			} else {
+				cs << fmt_str("m_%s.to_string()", members[i].second.c_str());
+			}
+			if (i != members.size() - 1) {
+				cs << ", ";
+			}
+		}
+		cs << ");\n";
 		cs << "}\n\n";
 	}
 

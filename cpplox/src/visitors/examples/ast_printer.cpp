@@ -15,6 +15,12 @@ AstPrinter::visit_binary_expr(const Binary& expr) const
 }
 
 std::any
+AstPrinter::visit_ternary_expr(const Ternary& expr) const
+{
+	return parenthesize("ternary", expr.get_condition(), expr.get_then_branch(), expr.get_else_branch());
+}
+
+std::any
 AstPrinter::visit_grouping_expr(const Grouping& expr) const
 {
 	return parenthesize("group", expr.get_expr());

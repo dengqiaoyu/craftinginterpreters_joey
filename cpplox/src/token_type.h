@@ -17,7 +17,9 @@ enum class TokenType
 	DOT,		 // .
 	MINUS,		 // -
 	PLUS,		 // +
+	COLON,		 // :
 	SEMICOLON,	 // ;
+	QUESTION,	 // ?
 	SLASH,		 // /
 	STAR,		 // *
 
@@ -73,7 +75,9 @@ to_string(const TokenType type)
 	case TokenType::DOT: return "DOT";
 	case TokenType::MINUS: return "MINUS";
 	case TokenType::PLUS: return "PLUS";
+	case TokenType::COLON: return "COLON";
 	case TokenType::SEMICOLON: return "SEMICOLON";
+	case TokenType::QUESTION: return "QUESTION";
 	case TokenType::SLASH: return "SLASH";
 	case TokenType::STAR: return "STAR";
 	case TokenType::BANG: return "BANG";
