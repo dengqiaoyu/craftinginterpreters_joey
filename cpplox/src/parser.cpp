@@ -1,10 +1,12 @@
 #include "parser.h"
 
+#include <memory>
 #include <stdexcept>
 
 #include "general.h"
 #include "lox.h"
 #include "token.h"
+#include "token_type.h"
 
 namespace {
 
@@ -84,6 +86,15 @@ Parser::expression() // NOLINT(misc-no-recursion)
 std::shared_ptr<Expr>
 Parser::equality() // NOLINT(misc-no-recursion)
 {
+	// Error handling for equality that does not have a left operand.
+	if (match(TokenType::BANG_EQUAL, TokenType::EQUAL_EQUAL)) {
+		const Token& eq_opr = previous();
+		error(eq_opr, "Expect left operand before equality operator.");
+		// Parse the right operand and continue parsing.
+		std::shared_ptr<Expr> right = comparison();
+		return right;
+	}
+
 	// Think about `a == b == c == d == e`.
 	std::shared_ptr<Expr> expr = comparison();
 	while (match(TokenType::BANG_EQUAL, TokenType::EQUAL_EQUAL)) {
@@ -98,6 +109,16 @@ Parser::equality() // NOLINT(misc-no-recursion)
 std::shared_ptr<Expr>
 Parser::comparison() // NOLINT(misc-no-recursion)
 {
+
+	// Error handling for comparison that does not have a left operand.
+	if (match(TokenType::GREATER, TokenType::GREATER_EQUAL, TokenType::LESS, TokenType::LESS_EQUAL)) {
+		const Token& cmp_opr = previous();
+		error(cmp_opr, "Expect left operand before comparison operator.");
+		// Parse the right operand and continue parsing.
+		std::shared_ptr<Expr> right = term();
+		return right;
+	}
+
 	std::shared_ptr<Expr> expr = term();
 	while (match(TokenType::GREATER, TokenType::GREATER_EQUAL, TokenType::LESS, TokenType::LESS_EQUAL)) {
 		const Token& cmp_opr = previous();
@@ -111,6 +132,16 @@ Parser::comparison() // NOLINT(misc-no-recursion)
 std::shared_ptr<Expr>
 Parser::term() // NOLINT(misc-no-recursion)
 {
+	// Error handling for term that does not have a left operand.
+	// Note that `-` is a unary operator, so we don't need to check for it here.
+	if (match(TokenType::PLUS)) {
+		const Token& add_opr = previous();
+		error(add_opr, "Expect left operand before term operator.");
+		// Parse the right operand and continue parsing.
+		std::shared_ptr<Expr> right = factor();
+		return right;
+	}
+
 	std::shared_ptr<Expr> expr = factor();
 	while (match(TokenType::MINUS, TokenType::PLUS)) {
 		const Token& add_opr = previous();
@@ -124,6 +155,15 @@ Parser::term() // NOLINT(misc-no-recursion)
 std::shared_ptr<Expr>
 Parser::factor() // NOLINT(misc-no-recursion)
 {
+	// Error handling for factor that does not have a left operand.
+	if (match(TokenType::SLASH, TokenType::STAR)) {
+		const Token& mul_opr = previous();
+		error(mul_opr, "Expect left operand before factor operator.");
+		// Parse the right operand and continue parsing.
+		std::shared_ptr<Expr> right = unary();
+		return right;
+	}
+
 	std::shared_ptr<Expr> expr = unary();
 	while (match(TokenType::SLASH, TokenType::STAR)) {
 		const Token& mul_opr = previous();
