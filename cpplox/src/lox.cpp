@@ -16,6 +16,7 @@
 #include "scanner.h"
 #include "utilities/lox_readline.h"
 #include "visitors/examples/ast_printer.h"
+#include "visitors/interpreter.h"
 
 void
 Lox::run_file(const std::string& path)
@@ -31,6 +32,9 @@ Lox::run_file(const std::string& path)
 
 	if (m_had_error) {
 		std::quick_exit(EX_DATAERR);
+	}
+	if (m_had_runtime_error) {
+		std::quick_exit(EX_SOFTWARE);
 	}
 }
 
@@ -51,6 +55,7 @@ Lox::run_prompt()
 		}
 		run(line);
 		m_had_error = false;
+		m_had_runtime_error = false;
 	}
 }
 
@@ -73,6 +78,17 @@ Lox::error(const Token& token, const std::string& message)
 // =====================================================================================================================
 // Private methods.
 
+// ====================================================================================================================
+
+Interpreter&
+Lox::get_interpreter()
+{
+	static auto* interpreter = new Interpreter(); // NOLINT(cppcoreguidelines-owning-memory)
+	return *interpreter;
+}
+
+// =====================================================================================================================
+
 void
 Lox::run(const std::string& content)
 {
@@ -86,7 +102,11 @@ Lox::run(const std::string& content)
 	std::cout << "Parsed expression: " << std::endl;
 	AstPrinter astPrinter;
 	std::cout << astPrinter.convert_string(*expr) << std::endl;
+
+	get_interpreter().interpret(expr);
 }
+
+// =====================================================================================================================
 
 bool Lox::m_had_error = false;
 void
@@ -94,4 +114,15 @@ Lox::report(const size_t line, const std::string& where, const std::string& mess
 {
 	std::cout << std::format("[line {}] Error {}: {}\n", line, where, message);
 	m_had_error = true;
+}
+
+// =====================================================================================================================
+
+bool Lox::m_had_runtime_error = false;
+void
+Lox::runtime_error(const RuntimeError& error)
+{
+	std::cout << error.get_message() << std::endl;
+	std::cout << std::format("[line {}]", error.get_token().get_line()) << std::endl;
+	m_had_runtime_error = true;
 }

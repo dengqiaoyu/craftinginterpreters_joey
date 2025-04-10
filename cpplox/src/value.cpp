@@ -101,7 +101,7 @@ Value::to_string() const
 				remove_trailing_zeros(str);
 				return str;
 			} else if constexpr (std::is_same_v<T, std::string>) {
-				return arg;
+				return "\"" + arg + "\"";
 			} else {
 				static_assert(false, "non-exhaustive visitor!");
 			}

@@ -170,6 +170,37 @@
 	#define require_assert(condition) assert((condition) && "assertion violated: " #condition)
 #endif
 
+// =====================================================================================================================
+
+constexpr double DEFAULT_EPSILON = 1e-9;
+
+static inline bool
+is_close(double a, double b, double epsilon = DEFAULT_EPSILON)
+{
+	return std::abs(a - b) < epsilon;
+}
+
+static inline bool
+is_close_to_zero(double a, double epsilon = DEFAULT_EPSILON)
+{
+	return is_close(a, 0.0, epsilon);
+}
+
+// =====================================================================================================================
+/*
+ *	@brief
+ *		Format a string using the given format and arguments.
+ *
+ *	@param fmt
+ *		The format string.
+ *
+ *	@param args
+ *		The arguments to format.
+ *
+ *	@return
+ *		The formatted string.
+ */
+
 // NOLINTBEGIN(cppcoreguidelines-avoid-c-arrays, hicpp-avoid-c-arrays, modernize-avoid-c-arrays)
 
 template <typename... Args>

@@ -67,10 +67,12 @@ set(CPPLOX_SOURCES
 	src/lox.cpp
 	src/main.cpp
 	src/parser.cpp
+	src/runtime_error.cpp
 	src/scanner.cpp
 	src/token.cpp
 	src/value.cpp
 	src/visitors/examples/ast_printer.cpp
+	src/visitors/interpreter.cpp
 
 	# Helpers
 	src/utilities/lox_readline.cpp
