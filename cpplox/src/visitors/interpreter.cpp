@@ -18,6 +18,22 @@
 namespace {
 
 void
+check_comparison_operands(const Token& opr, const std::any& left, const std::any& right)
+{
+	if (left.has_value() && right.has_value() && left.type() == typeid(Value) && right.type() == typeid(Value)) {
+		const Value& left_value = std::any_cast<Value>(left);
+		const Value& right_value = std::any_cast<Value>(right);
+		if ((left_value.is_number() && right_value.is_number()) ||
+			(left_value.is_string() && right_value.is_string())) {
+			return;
+		}
+	}
+	throw RuntimeError(opr, "Operands must be numbers or strings at the same time.");
+}
+
+// =====================================================================================================================
+
+void
 check_number_operand(const Token& opr, const std::any& operand)
 {
 	if (operand.has_value() && operand.type() == typeid(Value)) {
@@ -28,6 +44,8 @@ check_number_operand(const Token& opr, const std::any& operand)
 	}
 	throw RuntimeError(opr, "Operand must be number.");
 }
+
+// =====================================================================================================================
 
 void
 check_number_operands(const Token& opr, const std::any& left, const std::any& right)
@@ -41,6 +59,25 @@ check_number_operands(const Token& opr, const std::any& left, const std::any& ri
 	}
 	throw RuntimeError(opr, "Operands must be numbers.");
 }
+
+// =====================================================================================================================
+
+void
+check_number_or_string_operands(const Token& opr, const std::any& left, const std::any& right)
+{
+
+	if (left.has_value() && right.has_value() && left.type() == typeid(Value) && right.type() == typeid(Value)) {
+		const Value& left_value = std::any_cast<Value>(left);
+		const Value& right_value = std::any_cast<Value>(right);
+		if ((left_value.is_number() || left_value.is_string()) &&
+			(right_value.is_number() || right_value.is_string())) {
+			return;
+		}
+	}
+	throw RuntimeError(opr, "Operands must be numbers or strings.");
+}
+
+// =====================================================================================================================
 
 bool
 is_truthy(const std::any& any)
@@ -66,6 +103,8 @@ is_truthy(const std::any& any)
 	return true;
 }
 
+// =====================================================================================================================
+
 bool
 is_equal(const std::any& a, const std::any& b)
 {
@@ -89,8 +128,10 @@ is_equal(const std::any& a, const std::any& b)
 		return a_value == b_value;
 	}
 	// Asserts that unknown types are not handled.
-	assert(false && "Unknown type in is_equal");
+	require_assert_message(false, "Unknown type in is_equal");
 }
+
+// =====================================================================================================================
 
 std::string
 stringify(const std::any& any)
@@ -99,9 +140,14 @@ stringify(const std::any& any)
 		return "nil";
 	}
 	if (any.type() == typeid(Value)) {
-		return std::any_cast<Value>(any).to_string();
+		const Value& value = std::any_cast<Value>(any);
+		std::string value_str = std::any_cast<Value>(any).to_string();
+		if (value.is_string()) {
+			value_str = "\"" + value_str + "\"";
+		}
+		return value_str;
 	}
-	assert(false && "Unknown type in stringify");
+	require_assert_message(false, "Unknown type in stringify");
 }
 
 } // namespace
@@ -131,22 +177,22 @@ Interpreter::visit_binary_expr(const Binary& expr) const
 	switch (expr.get_opr().get_type()) {
 
 	// Equality.
-	case TokenType::BANG_EQUAL: return !is_equal(left, right);
-	case TokenType::EQUAL_EQUAL: return is_equal(left, right);
+	case TokenType::BANG_EQUAL: return Value(!is_equal(left, right));
+	case TokenType::EQUAL_EQUAL: return Value(is_equal(left, right));
 
 	// Comparison.
 	case TokenType::GREATER:
-		check_number_operands(expr.get_opr(), left, right);
-		return Value(std::any_cast<Value>(left).as_number() > std::any_cast<Value>(right).as_number());
+		check_comparison_operands(expr.get_opr(), left, right);
+		return Value(std::any_cast<Value>(left) > std::any_cast<Value>(right));
 	case TokenType::GREATER_EQUAL:
-		check_number_operands(expr.get_opr(), left, right);
-		return Value(std::any_cast<Value>(left).as_number() >= std::any_cast<Value>(right).as_number());
+		check_comparison_operands(expr.get_opr(), left, right);
+		return Value(std::any_cast<Value>(left) >= std::any_cast<Value>(right));
 	case TokenType::LESS:
-		check_number_operands(expr.get_opr(), left, right);
-		return Value(std::any_cast<Value>(left).as_number() < std::any_cast<Value>(right).as_number());
+		check_comparison_operands(expr.get_opr(), left, right);
+		return Value(std::any_cast<Value>(left) < std::any_cast<Value>(right));
 	case TokenType::LESS_EQUAL:
-		check_number_operands(expr.get_opr(), left, right);
-		return Value(std::any_cast<Value>(left).as_number() <= std::any_cast<Value>(right).as_number());
+		check_comparison_operands(expr.get_opr(), left, right);
+		return Value(std::any_cast<Value>(left) <= std::any_cast<Value>(right));
 
 	// Addition and subtraction.
 	case TokenType::MINUS:
@@ -154,15 +200,8 @@ Interpreter::visit_binary_expr(const Binary& expr) const
 		return Value(std::any_cast<Value>(left).as_number() - std::any_cast<Value>(right).as_number());
 	case TokenType::PLUS:
 		// Number or string addition.
-		if (left.type() == typeid(Value) && right.type() == typeid(Value)) {
-			if (std::any_cast<Value>(left).is_number() && std::any_cast<Value>(right).is_number()) {
-				return Value(std::any_cast<Value>(left).as_number() + std::any_cast<Value>(right).as_number());
-			}
-			if (std::any_cast<Value>(left).is_string() && std::any_cast<Value>(right).is_string()) {
-				return Value(std::any_cast<Value>(left).as_string() + std::any_cast<Value>(right).as_string());
-			}
-		}
-		throw RuntimeError(expr.get_opr(), "Operands must be two numbers or two strings.");
+		check_number_or_string_operands(expr.get_opr(), left, right);
+		return Value(std::any_cast<Value>(left) + std::any_cast<Value>(right));
 
 	// Factor.
 	case TokenType::STAR:
@@ -170,7 +209,8 @@ Interpreter::visit_binary_expr(const Binary& expr) const
 		return Value(std::any_cast<Value>(left).as_number() * std::any_cast<Value>(right).as_number());
 	case TokenType::SLASH:
 		check_number_operands(expr.get_opr(), left, right);
-		if (is_close_to_zero(std::any_cast<Value>(right).as_number())) {
+		if (std::any_cast<Value>(right).as_number() == 0.0) {
+			// Division by zero.
 			throw RuntimeError(expr.get_opr(), "Division by zero.");
 		}
 		return Value(std::any_cast<Value>(left).as_number() / std::any_cast<Value>(right).as_number());
@@ -218,7 +258,7 @@ Interpreter::visit_unary_expr(const Unary& expr) const
 
 	ignore_warning_begin("-Wswitch-enum");
 	switch (expr.get_opr().get_type()) {
-	case TokenType::BANG: return !is_truthy(right);
+	case TokenType::BANG: return Value(!is_truthy(right));
 	case TokenType::MINUS: {
 		check_number_operand(expr.get_opr(), right);
 		return Value(-std::any_cast<Value>(right).as_number());
@@ -226,7 +266,7 @@ Interpreter::visit_unary_expr(const Unary& expr) const
 	default: break;
 	}
 	ignore_warning_end();
-	assert(false && "Unknown unary operator");
+	require_assert_message(false, "Unknown unary operator");
 }
 
 // =====================================================================================================================

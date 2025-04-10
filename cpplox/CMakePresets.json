@@ -4,7 +4,7 @@
 		{
 			"name": "debug-clang-make",
 			"displayName": "Debug (Clang + Make)",
-			"generator": "Unix Makefiles",
+			"generator": "Ninja",
 			"binaryDir": "${sourceDir}/build/${presetName}",
 			"cacheVariables": {
 				"CMAKE_BUILD_TYPE": "Debug",

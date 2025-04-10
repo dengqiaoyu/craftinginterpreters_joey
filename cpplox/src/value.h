@@ -1,6 +1,7 @@
 #ifndef VALUE_H
 #define VALUE_H
 
+#include <compare>
 #include <format>
 #include <string>
 #include <variant>
@@ -14,19 +15,6 @@ enum class ValueType
 	NUMBER,
 	STRING,
 };
-
-[[nodiscard]] inline std::string
-to_string(ValueType type)
-{
-	ignore_warning_begin("-Wswitch-default");
-	switch (type) {
-	case ValueType::BOOL: return "bool";
-	case ValueType::NIL: return "nil";
-	case ValueType::NUMBER: return "number";
-	case ValueType::STRING: return "string";
-	}
-	ignore_warning_end();
-}
 
 class Value
 {
@@ -52,7 +40,9 @@ public:
 	friend std::ostream& operator<<(std::ostream& out_s, const Value& value);
 
 	bool operator==(const Value& other) const;
-	bool operator!=(const Value& other) const;
+	[[nodiscard]] std::partial_ordering operator<=>(const Value& other) const;
+
+	Value operator+(const Value& other) const;
 
 	// std::variant automatically handles the copy/move constructors and assignment operators.
 	// The destructor is also automatically generated.

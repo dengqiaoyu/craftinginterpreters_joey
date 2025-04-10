@@ -5,6 +5,19 @@
 
 namespace {
 
+std::string
+value_type_to_string(ValueType type)
+{
+	ignore_warning_begin("-Wswitch-default");
+	switch (type) {
+	case ValueType::BOOL: return "bool";
+	case ValueType::NIL: return "nil";
+	case ValueType::NUMBER: return "number";
+	case ValueType::STRING: return "string";
+	}
+	ignore_warning_end();
+}
+
 void
 remove_trailing_zeros(std::string& str)
 {
@@ -101,7 +114,7 @@ Value::to_string() const
 				remove_trailing_zeros(str);
 				return str;
 			} else if constexpr (std::is_same_v<T, std::string>) {
-				return "\"" + arg + "\"";
+				return arg;
 			} else {
 				static_assert(false, "non-exhaustive visitor!");
 			}
@@ -125,11 +138,27 @@ Value::operator==(const Value& other) const
 	return m_value == other.m_value;
 }
 
-bool
-Value::operator!=(const Value& other) const
+std::partial_ordering
+Value::operator<=>(const Value& other) const
 {
 	if (m_type != other.m_type) {
-		return true;
+		return std::partial_ordering::unordered;
 	}
-	return m_value != other.m_value;
+	if (m_value == other.m_value) {
+		return std::partial_ordering::equivalent;
+	}
+	return m_value <=> other.m_value;
+}
+
+Value
+Value::operator+(const Value& other) const
+{
+	if ((is_number() || is_string()) && (other.is_number() || other.is_string())) {
+		if (is_number() && other.is_number()) {
+			return Value(as_number() + other.as_number());
+		}
+		return Value(to_string() + other.to_string());
+	}
+	throw std::runtime_error(
+		"Invalid operation: cannot add " + value_type_to_string(m_type) + " and " + value_type_to_string(other.m_type));
 }

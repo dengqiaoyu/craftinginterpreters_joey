@@ -7,6 +7,10 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
+# Set parallel build level, only needed for Makefile generator.
+# For Ninja generator, comment this line.
+# set(CMAKE_BUILD_PARALLEL_LEVEL $(nproc))
+
 # Ensure we're using Clang
 if(NOT CMAKE_CXX_COMPILER_ID MATCHES "Clang")
 	message(FATAL_ERROR "This CMakeLists.txt is configured specifically for Clang")

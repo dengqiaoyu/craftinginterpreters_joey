@@ -170,6 +170,17 @@
 	#define require_assert(condition) assert((condition) && "assertion violated: " #condition)
 #endif
 
+// Helper macros for stringification
+#define STRINGIFY_HELPER(x) #x
+#define STRINGIFY(x)		STRINGIFY_HELPER(x)
+
+#ifndef require_assert_message
+	// NOLINTBEGIN(misc-static-assert, cert-dcl03-c, hicpp-static-assert)
+	#define require_assert_message(condition, message)                                                                 \
+		assert((condition) && (message " [" __FILE__ ":" STRINGIFY(__LINE__) "]"))
+	// NOLINTEND(misc-static-assert, cert-dcl03-c, hicpp-static-assert)
+#endif
+
 // =====================================================================================================================
 
 constexpr double DEFAULT_EPSILON = 1e-9;

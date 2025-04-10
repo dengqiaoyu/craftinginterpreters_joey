@@ -29,6 +29,10 @@ AstPrinter::visit_grouping_expr(const Grouping& expr) const
 std::any
 AstPrinter::visit_literal_expr(const Literal& expr) const
 {
+	const bool is_string = expr.get_value().is_string();
+	if (is_string) {
+		return std::format("\"{}\"", expr.get_value());
+	}
 	return std::format("{}", expr.get_value());
 }
 
