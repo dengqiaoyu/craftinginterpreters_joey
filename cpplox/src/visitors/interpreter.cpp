@@ -56,10 +56,10 @@ is_truthy(const std::any& any)
 		if (value.is_nil()) {
 			return false;
 		}
-		if (value.is_bool() && value.as_bool()) {
-			return true;
+		if (value.is_bool()) {
+			return value.as_bool();
 		}
-		if (value.is_number() && value.as_number() == 0.0) {
+		if (value.is_number()) {
 			return value.as_number() != 0.0;
 		}
 	}
@@ -186,8 +186,11 @@ Interpreter::visit_binary_expr(const Binary& expr) const
 std::any
 Interpreter::visit_ternary_expr(const Ternary& expr) const
 {
-	std::any condition = evaluate(expr.get_condition());
-	return is_truthy(condition) ? evaluate(expr.get_then_branch()) : evaluate(expr.get_else_branch());
+	if (is_truthy(evaluate(expr.get_condition()))) {
+		return evaluate(expr.get_then_branch());
+	} else { // NOLINT(llvm-else-after-return, readability-else-after-return)
+		return evaluate(expr.get_else_branch());
+	}
 }
 
 // ====================================================================================================================
