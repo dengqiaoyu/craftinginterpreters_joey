@@ -7,8 +7,10 @@
 #include <string>
 
 #include "expr.h"
+#include "token.h"
 
 // Forward declarations.
+class Var;
 class Expression;
 class Print;
 
@@ -24,6 +26,7 @@ public:
 	StmtVisitor& operator=(StmtVisitor&&) noexcept = default;
 	virtual ~StmtVisitor();
 
+	[[nodiscard]] virtual std::any visit_var_stmt(const Var& stmt) const = 0;
 	[[nodiscard]] virtual std::any visit_expression_stmt(const Expression& stmt) const = 0;
 	[[nodiscard]] virtual std::any visit_print_stmt(const Print& stmt) const = 0;
 };
@@ -46,6 +49,22 @@ public:
 };
 
 // =====================================================================================================================
+class Var : public Stmt
+{
+public:
+	Var(Token name, std::shared_ptr<const Expr> initializer);
+
+	[[nodiscard]] const Token& get_name() const;
+	[[nodiscard]] const std::shared_ptr<const Expr>& get_initializer() const;
+
+	[[nodiscard]] std::any accept(const StmtVisitor& visitor) const override;
+	[[nodiscard]] std::string to_string() const override;
+private:
+	Token m_name;
+	std::shared_ptr<const Expr> m_initializer;
+};
+
+// =====================================================================================================================
 class Expression : public Stmt
 {
 public:
@@ -55,7 +74,6 @@ public:
 
 	[[nodiscard]] std::any accept(const StmtVisitor& visitor) const override;
 	[[nodiscard]] std::string to_string() const override;
-
 private:
 	std::shared_ptr<const Expr> m_expr;
 };
@@ -70,7 +88,6 @@ public:
 
 	[[nodiscard]] std::any accept(const StmtVisitor& visitor) const override;
 	[[nodiscard]] std::string to_string() const override;
-
 private:
 	std::shared_ptr<const Expr> m_expr;
 };

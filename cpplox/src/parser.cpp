@@ -41,7 +41,7 @@ Parser::parse()
 	std::vector<std::shared_ptr<Stmt>> statements;
 
 	while (!is_at_end()) {
-		statements.push_back(statement());
+		statements.push_back(declaration());
 	}
 
 	return statements;
@@ -224,6 +224,9 @@ Parser::primary() // NOLINT(misc-no-recursion)
 	if (match(TokenType::NUMBER, TokenType::STRING)) {
 		return std::make_shared<Literal>(previous().get_literal());
 	}
+	if (match(TokenType::VAR)) {
+		return std::make_shared<Variable>(previous());
+	}
 	if (match(TokenType::LEFT_PAREN)) {
 		std::shared_ptr<Expr> comma_expr = comma_expression();
 		consume(TokenType::RIGHT_PAREN, "Expect ')' after expression.");
@@ -235,6 +238,38 @@ Parser::primary() // NOLINT(misc-no-recursion)
 
 // =====================================================================================================================
 // Statement grammar.
+
+// =======================================================================================================
+// declaration -> variable_declaration | statement
+
+std::shared_ptr<Stmt>
+Parser::declaration()
+{
+	try {
+		if (match(TokenType::VAR)) {
+			return variable_declaration();
+		}
+		return statement();
+	} catch (UNUSED const ParserError& error) {
+		synchronize();
+		return nullptr;
+	}
+}
+
+// =====================================================================================================================
+// variable_declaration -> "var" IDENTIFIER ( "=" <comma_expression> )? ";"
+
+std::shared_ptr<Stmt>
+Parser::variable_declaration()
+{
+	const Token& name = consume(TokenType::IDENTIFIER, "Expect variable name.");
+	std::shared_ptr<Expr> initializer = nullptr;
+	if (match(TokenType::EQUAL)) {
+		initializer = comma_expression();
+	}
+	consume(TokenType::SEMICOLON, "Expect ';' after variable declaration.");
+	return std::make_shared<Var>(name, initializer);
+}
 
 // =====================================================================================================================
 // statement	-> <expr_stmt> | <print_stmt>

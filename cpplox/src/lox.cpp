@@ -15,7 +15,6 @@
 #include "parser.h"
 #include "scanner.h"
 #include "utilities/lox_readline.h"
-#include "visitors/examples/ast_printer.h"
 #include "visitors/interpreter.h"
 
 void

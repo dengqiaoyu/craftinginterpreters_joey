@@ -394,6 +394,12 @@ main()
 					{"Value", 						"value"}
 				}
 			),
+			ASTClass(
+				"Variable",
+				{
+					{"Token",						"name"}
+				}
+			),
 			ASTClass("Unary",
 				{
 					{"Token",						"opr"},
@@ -406,8 +412,14 @@ main()
 	std::cout << std::format("======================") << std::endl;
 
 	// clang-format off
-	generate_ast("src/asts", {"\"expr.h\""}, "Stmt",
+	generate_ast("src/asts", {"\"expr.h\"", "\"token.h\""}, "Stmt",
 		{
+			ASTClass("Var",
+				{
+					{"Token",						"name"},
+					{"std::shared_ptr<const Expr>",	"initializer"}
+				}
+			),
 			ASTClass("Expression",
 				{
 					{"std::shared_ptr<const Expr>",	"expr"}

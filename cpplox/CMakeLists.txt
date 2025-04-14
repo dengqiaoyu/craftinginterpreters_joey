@@ -69,6 +69,7 @@ set(CPPLOX_SOURCES
 	# Core code
 	src/asts/expr.cpp
 	src/asts/stmt.cpp
+	src/environment.cpp
 	src/lox.cpp
 	src/main.cpp
 	src/parser.cpp

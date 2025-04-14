@@ -156,6 +156,12 @@ stringify(const std::any& any, const bool is_print_statement = false)
 // =====================================================================================================================
 // Public methods
 
+// =====================================================================================================================
+
+Interpreter::Interpreter() = default;
+
+// =====================================================================================================================
+
 void
 Interpreter::interpret(const std::vector<std::shared_ptr<Stmt>>& statements)
 {
@@ -278,6 +284,19 @@ Interpreter::visit_unary_expr(const Unary& expr) const
 
 // =====================================================================================================================
 // Visit statement.
+
+// ====================================================================================================================
+
+std::any
+Interpreter::visit_var_stmt(const Var& stmt) const
+{
+	std::any value;
+	if (stmt.get_initializer()) {
+		value = evaluate(stmt.get_initializer());
+	}
+	m_environment.define(stmt.get_name(), value);
+	return Value();
+}
 
 // =====================================================================================================================
 

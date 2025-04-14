@@ -14,6 +14,7 @@ class Binary;
 class Ternary;
 class Grouping;
 class Literal;
+class Variable;
 class Unary;
 
 // =====================================================================================================================
@@ -32,6 +33,7 @@ public:
 	[[nodiscard]] virtual std::any visit_ternary_expr(const Ternary& expr) const = 0;
 	[[nodiscard]] virtual std::any visit_grouping_expr(const Grouping& expr) const = 0;
 	[[nodiscard]] virtual std::any visit_literal_expr(const Literal& expr) const = 0;
+	[[nodiscard]] virtual std::any visit_variable_expr(const Variable& expr) const = 0;
 	[[nodiscard]] virtual std::any visit_unary_expr(const Unary& expr) const = 0;
 };
 
@@ -64,7 +66,6 @@ public:
 
 	[[nodiscard]] std::any accept(const ExprVisitor& visitor) const override;
 	[[nodiscard]] std::string to_string() const override;
-
 private:
 	std::shared_ptr<const Expr> m_left;
 	Token m_opr;
@@ -75,8 +76,7 @@ private:
 class Ternary : public Expr
 {
 public:
-	Ternary(std::shared_ptr<const Expr> condition, Token qmark, std::shared_ptr<const Expr> then_branch, Token colon,
-		std::shared_ptr<const Expr> else_branch);
+	Ternary(std::shared_ptr<const Expr> condition, Token qmark, std::shared_ptr<const Expr> then_branch, Token colon, std::shared_ptr<const Expr> else_branch);
 
 	[[nodiscard]] const std::shared_ptr<const Expr>& get_condition() const;
 	[[nodiscard]] const Token& get_qmark() const;
@@ -86,7 +86,6 @@ public:
 
 	[[nodiscard]] std::any accept(const ExprVisitor& visitor) const override;
 	[[nodiscard]] std::string to_string() const override;
-
 private:
 	std::shared_ptr<const Expr> m_condition;
 	Token m_qmark;
@@ -105,7 +104,6 @@ public:
 
 	[[nodiscard]] std::any accept(const ExprVisitor& visitor) const override;
 	[[nodiscard]] std::string to_string() const override;
-
 private:
 	std::shared_ptr<const Expr> m_expr;
 };
@@ -120,9 +118,22 @@ public:
 
 	[[nodiscard]] std::any accept(const ExprVisitor& visitor) const override;
 	[[nodiscard]] std::string to_string() const override;
-
 private:
 	Value m_value;
+};
+
+// =====================================================================================================================
+class Variable : public Expr
+{
+public:
+	explicit Variable(Token name);
+
+	[[nodiscard]] const Token& get_name() const;
+
+	[[nodiscard]] std::any accept(const ExprVisitor& visitor) const override;
+	[[nodiscard]] std::string to_string() const override;
+private:
+	Token m_name;
 };
 
 // =====================================================================================================================
@@ -136,7 +147,6 @@ public:
 
 	[[nodiscard]] std::any accept(const ExprVisitor& visitor) const override;
 	[[nodiscard]] std::string to_string() const override;
-
 private:
 	Token m_opr;
 	std::shared_ptr<const Expr> m_right;

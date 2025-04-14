@@ -44,7 +44,8 @@ private:
 	 * unary					-> ( "!" | "-" ) unary
 	 *							| primary ;
 	 * primary					-> NUMBER | STRING | "true" | "false" | "nil"
-	 *							| "(" comma_expression ")" ;
+	 *							| "(" comma_expression ")"
+	 *							| IDENTIFIER;
 	 */
 
 	std::shared_ptr<Expr> comma_expression();
@@ -60,13 +61,18 @@ private:
 	/*
 	 * Statement grammar:
 	 *
-	 * program					-> statement* EOF ;
+	 * program					-> declaration* EOF ;
+	 * declaration				-> variable_declaration
+	 *							|statement ;
+	 * variable_declaration		-> "var" IDENTIFIER ( "=" expression )? ";" ;
 	 * statement				-> expression_statement
 	 *							| print_statement ;
 	 * expression_statement		-> expression ";" ;
 	 * print_statement			-> "print" expression ";" ;
 	 */
 
+	std::shared_ptr<Stmt> declaration();
+	std::shared_ptr<Stmt> variable_declaration();
 	std::shared_ptr<Stmt> statement();
 	std::shared_ptr<Stmt> expression_statement();
 	std::shared_ptr<Stmt> print_statement();
