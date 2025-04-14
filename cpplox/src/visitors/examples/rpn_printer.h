@@ -4,9 +4,9 @@
 #include <any>
 #include <string>
 
-#include "expr.h"
+#include "asts/expr.h"
 
-class RpnPrinter : public Visitor
+class RpnPrinter : public ExprVisitor
 {
 public:
 	[[nodiscard]] std::string convert_string(const Expr& expr) const;

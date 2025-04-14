@@ -2,7 +2,7 @@
 
 // =====================================================================================================================
 // visitor
-Visitor::~Visitor() = default;
+ExprVisitor::~ExprVisitor() = default;
 
 // =====================================================================================================================
 // Expr
@@ -53,7 +53,7 @@ Binary::get_right() const
 }
 
 std::any
-Binary::accept(const Visitor& visitor) const
+Binary::accept(const ExprVisitor& visitor) const
 {
 	return visitor.visit_binary_expr(*this);
 }
@@ -61,7 +61,7 @@ Binary::accept(const Visitor& visitor) const
 std::string
 Binary::to_string() const
 {
-	return std::format("Binary Expr{{left={}, opr={}, right={}}}", m_left->to_string(), m_opr.to_string(),
+	return std::format("Binary expr{{left={}, opr={}, right={}}}", m_left->to_string(), m_opr.to_string(),
 		m_right->to_string());
 }
 
@@ -107,7 +107,7 @@ Ternary::get_else_branch() const
 }
 
 std::any
-Ternary::accept(const Visitor& visitor) const
+Ternary::accept(const ExprVisitor& visitor) const
 {
 	return visitor.visit_ternary_expr(*this);
 }
@@ -115,7 +115,7 @@ Ternary::accept(const Visitor& visitor) const
 std::string
 Ternary::to_string() const
 {
-	return std::format("Ternary Expr{{condition={}, qmark={}, then_branch={}, colon={}, else_branch={}}}",
+	return std::format("Ternary expr{{condition={}, qmark={}, then_branch={}, colon={}, else_branch={}}}",
 		m_condition->to_string(), m_qmark.to_string(), m_then_branch->to_string(), m_colon.to_string(),
 		m_else_branch->to_string());
 }
@@ -135,7 +135,7 @@ Grouping::get_expr() const
 }
 
 std::any
-Grouping::accept(const Visitor& visitor) const
+Grouping::accept(const ExprVisitor& visitor) const
 {
 	return visitor.visit_grouping_expr(*this);
 }
@@ -143,7 +143,7 @@ Grouping::accept(const Visitor& visitor) const
 std::string
 Grouping::to_string() const
 {
-	return std::format("Grouping Expr{{expr={}}}", m_expr->to_string());
+	return std::format("Grouping expr{{expr={}}}", m_expr->to_string());
 }
 
 // =====================================================================================================================
@@ -161,7 +161,7 @@ Literal::get_value() const
 }
 
 std::any
-Literal::accept(const Visitor& visitor) const
+Literal::accept(const ExprVisitor& visitor) const
 {
 	return visitor.visit_literal_expr(*this);
 }
@@ -169,7 +169,7 @@ Literal::accept(const Visitor& visitor) const
 std::string
 Literal::to_string() const
 {
-	return std::format("Literal Expr{{value={}}}", m_value.to_string());
+	return std::format("Literal expr{{value={}}}", m_value.to_string());
 }
 
 // =====================================================================================================================
@@ -193,7 +193,7 @@ Unary::get_right() const
 }
 
 std::any
-Unary::accept(const Visitor& visitor) const
+Unary::accept(const ExprVisitor& visitor) const
 {
 	return visitor.visit_unary_expr(*this);
 }
@@ -201,5 +201,5 @@ Unary::accept(const Visitor& visitor) const
 std::string
 Unary::to_string() const
 {
-	return std::format("Unary Expr{{opr={}, right={}}}", m_opr.to_string(), m_right->to_string());
+	return std::format("Unary expr{{opr={}, right={}}}", m_opr.to_string(), m_right->to_string());
 }

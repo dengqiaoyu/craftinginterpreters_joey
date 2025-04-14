@@ -67,7 +67,8 @@ include_directories(
 set(CPPLOX_SOURCES
 
 	# Core code
-	src/expr.cpp
+	src/asts/expr.cpp
+	src/asts/stmt.cpp
 	src/lox.cpp
 	src/main.cpp
 	src/parser.cpp
@@ -98,7 +99,7 @@ add_executable(ast_module_generator ${AST_MODULE_GENERATOR_SOURCES})
 # ======================================================================================================================
 # Target: visitor_examples
 set(VISITOR_EXAMPLES_SOURCES
-	src/expr.cpp
+	src/asts/expr.cpp
 	src/token.cpp
 	src/value.cpp
 

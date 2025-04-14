@@ -5,9 +5,9 @@
 #include <format>
 #include <string>
 
-#include "expr.h"
+#include "asts/expr.h"
 
-class AstPrinter : public Visitor
+class AstPrinter : public ExprVisitor
 {
 public:
 	[[nodiscard]] std::string convert_string(const Expr& expr) const;

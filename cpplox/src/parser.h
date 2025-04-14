@@ -6,7 +6,8 @@
 #include <memory>
 #include <vector>
 
-#include "expr.h"
+#include "asts/expr.h"
+#include "asts/stmt.h"
 #include "general.h"
 #include "token.h"
 #include "token_type.h"
@@ -21,7 +22,7 @@ public:
 		// Empty constructor.
 	}
 
-	std::shared_ptr<Expr> parse();
+	std::vector<std::shared_ptr<Stmt>> parse();
 
 private:
 	std::vector<Token> m_tokens;
@@ -30,7 +31,7 @@ private:
 	[[nodiscard]] const std::vector<Token>& get_tokens() const;
 
 	/*
-	 * Grammar:
+	 * Expression grammar:
 	 *
 	 * comma_expression			-> expression ( "," expression )* ;
 	 * conditional_expression	-> expression ? expression : conditional_expression:
@@ -55,6 +56,20 @@ private:
 	std::shared_ptr<Expr> factor();
 	std::shared_ptr<Expr> unary();
 	std::shared_ptr<Expr> primary();
+
+	/*
+	 * Statement grammar:
+	 *
+	 * program					-> statement* EOF ;
+	 * statement				-> expression_statement
+	 *							| print_statement ;
+	 * expression_statement		-> expression ";" ;
+	 * print_statement			-> "print" expression ";" ;
+	 */
+
+	std::shared_ptr<Stmt> statement();
+	std::shared_ptr<Stmt> expression_statement();
+	std::shared_ptr<Stmt> print_statement();
 
 	template <typename... VT_TokenType>
 		requires((std::is_same_v<VT_TokenType, TokenType>) && ...)

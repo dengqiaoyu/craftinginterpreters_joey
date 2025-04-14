@@ -3,6 +3,8 @@
 #include <memory>
 #include <stdexcept>
 
+#include "asts/expr.h"
+#include "asts/stmt.h"
 #include "general.h"
 #include "lox.h"
 #include "token.h"
@@ -33,18 +35,23 @@ error(const Token& token, const std::string& message)
 // =====================================================================================================================
 // Public methods.
 
-std::shared_ptr<Expr>
+std::vector<std::shared_ptr<Stmt>>
 Parser::parse()
 {
-	try {
-		return comma_expression();
-	} catch (UNUSED const ParserError& error) {
-		return nullptr;
+	std::vector<std::shared_ptr<Stmt>> statements;
+
+	while (!is_at_end()) {
+		statements.push_back(statement());
 	}
+
+	return statements;
 }
 
 // =====================================================================================================================
 // Private methods.
+
+// =====================================================================================================================
+// Expression grammar.
 
 // <comma_expression> -> <expression> ( "," <expression> )*
 std::shared_ptr<Expr>
@@ -58,6 +65,8 @@ Parser::comma_expression() // NOLINT(misc-no-recursion)
 	}
 	return expr;
 }
+
+// =====================================================================================================================
 
 // conditional_expression	-> expression ? expression : conditional_expression:
 // 							| expression
@@ -75,12 +84,16 @@ Parser::conditional_expression() // NOLINT(misc-no-recursion)
 	return expr;
 }
 
+// =====================================================================================================================
+
 // <expression> -> <equality>
 std::shared_ptr<Expr>
 Parser::expression() // NOLINT(misc-no-recursion)
 {
 	return equality();
 }
+
+// =====================================================================================================================
 
 // <equality> -> <comparison> ( ( "!=" | "==" ) <comparison> )*
 std::shared_ptr<Expr>
@@ -105,6 +118,8 @@ Parser::equality() // NOLINT(misc-no-recursion)
 	return expr;
 }
 
+// =====================================================================================================================
+
 // <comparison> -> <term> ( ( ">" | ">=" | "<" | "<=" ) <term> )*
 std::shared_ptr<Expr>
 Parser::comparison() // NOLINT(misc-no-recursion)
@@ -127,6 +142,8 @@ Parser::comparison() // NOLINT(misc-no-recursion)
 	}
 	return expr;
 }
+
+// =====================================================================================================================
 
 // <term> -> <factor> ( ( "-" | "+" ) <factor> )*
 std::shared_ptr<Expr>
@@ -151,6 +168,8 @@ Parser::term() // NOLINT(misc-no-recursion)
 	return expr;
 }
 
+// =====================================================================================================================
+
 // <factor> -> <unary> ( ( "/" | "*" ) <unary> )*
 std::shared_ptr<Expr>
 Parser::factor() // NOLINT(misc-no-recursion)
@@ -173,6 +192,8 @@ Parser::factor() // NOLINT(misc-no-recursion)
 	return expr;
 }
 
+// =====================================================================================================================
+
 // <unary> -> ( "!" | "-" ) <unary> | <primary>
 std::shared_ptr<Expr>
 Parser::unary() // NOLINT(misc-no-recursion)
@@ -184,6 +205,8 @@ Parser::unary() // NOLINT(misc-no-recursion)
 	}
 	return primary();
 }
+
+// =====================================================================================================================
 
 // <primary> -> NUMBER | STRING | "true" | "false" | "nil" | "(" <comma_expression> ")"
 std::shared_ptr<Expr>
@@ -210,13 +233,57 @@ Parser::primary() // NOLINT(misc-no-recursion)
 	throw error(peek(), "Expect expression.");
 }
 
+// =====================================================================================================================
+// Statement grammar.
+
+// =====================================================================================================================
+// statement	-> <expr_stmt> | <print_stmt>
+
+std::shared_ptr<Stmt>
+Parser::statement()
+{
+	if (match(TokenType::PRINT)) {
+		return print_statement();
+	}
+	return expression_statement();
+}
+
+// =====================================================================================================================
+// expression_statement -> <expression> ";"
+std::shared_ptr<Stmt>
+Parser::expression_statement()
+{
+	std::shared_ptr<Expr> expr = expression();
+	consume(TokenType::SEMICOLON, "Expect ';' after expression.");
+	return std::make_shared<Expression>(expr);
+}
+
+// =====================================================================================================================
+// print_statement -> "print" <expression> ";"
+std::shared_ptr<Stmt>
+Parser::print_statement()
+{
+	std::shared_ptr<Expr> expr = expression();
+	consume(TokenType::SEMICOLON, "Expect ';' after expression.");
+	return std::make_shared<Print>(expr);
+}
+
+// =====================================================================================================================
+// Helper methods.
+
+// =====================================================================================================================
+
 ParserError::~ParserError() = default;
+
+// =====================================================================================================================
 
 const std::vector<Token>&
 Parser::get_tokens() const
 {
 	return m_tokens;
 }
+
+// =====================================================================================================================
 
 Token
 Parser::advance()
@@ -227,6 +294,8 @@ Parser::advance()
 	return previous();
 }
 
+// =====================================================================================================================
+
 Token
 Parser::consume(const TokenType type, const std::string& message)
 {
@@ -234,6 +303,8 @@ Parser::consume(const TokenType type, const std::string& message)
 	require_throw(consumed, error(peek(), message));
 	return advance();
 }
+
+// =====================================================================================================================
 
 void
 Parser::synchronize()
@@ -259,6 +330,8 @@ Parser::synchronize()
 	}
 }
 
+// =====================================================================================================================
+
 bool
 Parser::check(const TokenType type) const
 {
@@ -267,6 +340,8 @@ Parser::check(const TokenType type) const
 	return token.get_type() == type;
 }
 
+// =====================================================================================================================
+
 bool
 Parser::is_at_end() const
 {
@@ -274,14 +349,20 @@ Parser::is_at_end() const
 	return token.get_type() == TokenType::END_OF_FILE;
 }
 
+// =====================================================================================================================
+
 const Token&
 Parser::peek() const
 {
 	return get_tokens().at(current);
 }
 
+// =====================================================================================================================
+
 const Token&
 Parser::previous() const
 {
 	return get_tokens().at(current - 1);
 }
+
+// =====================================================================================================================

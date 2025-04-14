@@ -69,7 +69,7 @@ void
 Lox::error(const Token& token, const std::string& message)
 {
 	if (token.get_type() == TokenType::END_OF_FILE) {
-		report(token.get_line(), " at end", message);
+		report(token.get_line(), "at the end", message);
 	} else {
 		report(token.get_line(), std::format("at '{}'", token.get_lexeme()), message);
 	}
@@ -96,14 +96,13 @@ Lox::run(const std::string& content)
 	const std::vector<Token>& tokens = scanner.get_tokens();
 
 	Parser parser(tokens);
-	const std::shared_ptr<Expr> expr = parser.parse();
-	require_nonnull_return(expr);
 
-	std::cout << "Parsed expression: " << std::endl;
-	AstPrinter astPrinter;
-	std::cout << astPrinter.convert_string(*expr) << std::endl;
-
-	get_interpreter().interpret(expr);
+	try {
+		std::vector<std::shared_ptr<Stmt>> statements = parser.parse();
+		get_interpreter().interpret(statements);
+	} catch (const std::exception& e) {
+		(void)e;
+	}
 }
 
 // =====================================================================================================================

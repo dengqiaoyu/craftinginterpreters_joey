@@ -4,9 +4,10 @@
 #include <cassert>
 #include <cstddef>
 #include <cstdlib>
+#include <memory>
 #include <string>
+#include <tuple>
 
-#include "expr.h"
 #include "general.h"
 #include "lox.h"
 #include "runtime_error.h"
@@ -134,7 +135,7 @@ is_equal(const std::any& a, const std::any& b)
 // =====================================================================================================================
 
 std::string
-stringify(const std::any& any)
+stringify(const std::any& any, const bool is_print_statement = false)
 {
 	if (!any.has_value()) {
 		return "nil";
@@ -142,7 +143,7 @@ stringify(const std::any& any)
 	if (any.type() == typeid(Value)) {
 		const Value& value = std::any_cast<Value>(any);
 		std::string value_str = std::any_cast<Value>(any).to_string();
-		if (value.is_string()) {
+		if (!is_print_statement && value.is_string()) {
 			value_str = "\"" + value_str + "\"";
 		}
 		return value_str;
@@ -156,15 +157,21 @@ stringify(const std::any& any)
 // Public methods
 
 void
-Interpreter::interpret(const std::shared_ptr<const Expr>& expr)
+Interpreter::interpret(const std::vector<std::shared_ptr<Stmt>>& statements)
 {
 	try {
-		std::any result = evaluate(expr);
-		std::cout << stringify(result) << std::endl;
+		for (const std::shared_ptr<Stmt>& statement : statements) {
+			execute(statement);
+		}
 	} catch (const RuntimeError& error) {
 		Lox::runtime_error(error);
 	}
 }
+
+// =====================================================================================================================
+// Visit expression.
+
+// =====================================================================================================================
 
 std::any
 Interpreter::visit_binary_expr(const Binary& expr) const
@@ -270,6 +277,28 @@ Interpreter::visit_unary_expr(const Unary& expr) const
 }
 
 // =====================================================================================================================
+// Visit statement.
+
+// =====================================================================================================================
+
+std::any
+Interpreter::visit_expression_stmt(const Expression& stmt) const
+{
+	std::ignore = evaluate(stmt.get_expr());
+	return Value();
+}
+
+// =====================================================================================================================
+
+std::any
+Interpreter::visit_print_stmt(const Print& stmt) const
+{
+	std::any result = evaluate(stmt.get_expr());
+	std::cout << stringify(result, true) << std::endl;
+	return Value();
+}
+
+// =====================================================================================================================
 // Private methods
 
 std::any
@@ -277,4 +306,10 @@ Interpreter::evaluate(const std::shared_ptr<const Expr>& expr) const
 {
 	require_assert(expr);
 	return expr->accept(*this);
+}
+
+void
+Interpreter::execute(const std::shared_ptr<const Stmt>& statement) const
+{
+	std::ignore = statement->accept(*this);
 }
