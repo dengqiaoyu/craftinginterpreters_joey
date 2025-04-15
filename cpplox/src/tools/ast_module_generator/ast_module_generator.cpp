@@ -147,7 +147,7 @@ generate_ast(const std::string& output_dir_path, const std::vector<std::string>&
 
 	// Visitor methods
 	for (const auto& ast_class : ast_classes) {
-		hs << fmt_str("	[[nodiscard]] virtual std::any visit_%s_%s(const %s& %s) const = 0;\n",
+		hs << fmt_str("	[[nodiscard]] virtual std::any visit_%s_%s(const %s& %s) = 0;\n",
 			tolower(ast_class.get_class_name()).c_str(), bvar_n, ast_class.get_class_name().c_str(), bvar_n);
 	}
 	hs << fmt_str("};\n\n");
@@ -167,7 +167,7 @@ generate_ast(const std::string& output_dir_path, const std::vector<std::string>&
 	hs << fmt_str("	%s& operator=(%s&&) noexcept = default;\n", bcls_n, bcls_n);
 	hs << fmt_str("	virtual ~%s();\n", bcls_n);
 	hs << fmt_str("\n");
-	hs << fmt_str("	[[nodiscard]] virtual std::any accept(const %sVisitor& visitor) const = 0;\n", bcls_n);
+	hs << fmt_str("	[[nodiscard]] virtual std::any accept(%sVisitor& visitor) const = 0;\n", bcls_n);
 	hs << fmt_str("	[[nodiscard]] virtual std::string to_string() const = 0;\n");
 	hs << fmt_str("	friend std::ostream& operator<<(std::ostream& out_s, const %s& %s);\n", bcls_n, bvar_n);
 	hs << fmt_str("};\n\n");
@@ -211,7 +211,7 @@ generate_ast(const std::string& output_dir_path, const std::vector<std::string>&
 		hs << fmt_str("\n");
 
 		// Then generate accept and to_string methods
-		hs << fmt_str("	[[nodiscard]] std::any accept(const %sVisitor& visitor) const override;\n", bcls_n);
+		hs << fmt_str("	[[nodiscard]] std::any accept(%sVisitor& visitor) const override;\n", bcls_n);
 		hs << fmt_str("	[[nodiscard]] std::string to_string() const override;");
 		hs << "\n";
 		hs << fmt_str("private:\n");
@@ -325,7 +325,7 @@ generate_ast(const std::string& output_dir_path, const std::vector<std::string>&
 
 		// Accept method (after getters)
 		cs << fmt_str("std::any\n");
-		cs << fmt_str("%s::accept(const %sVisitor& visitor) const\n", class_name.c_str(), bcls_n);
+		cs << fmt_str("%s::accept(%sVisitor& visitor) const\n", class_name.c_str(), bcls_n);
 		cs << "{\n";
 		cs << fmt_str("	return visitor.visit_%s_%s(*this);\n", tolower(class_name).c_str(), bvar_n);
 		cs << "}\n\n";

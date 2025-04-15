@@ -180,7 +180,7 @@ Interpreter::interpret(const std::vector<std::shared_ptr<Stmt>>& statements)
 // =====================================================================================================================
 
 std::any
-Interpreter::visit_binary_expr(const Binary& expr) const
+Interpreter::visit_binary_expr(const Binary& expr)
 {
 	std::any left = evaluate(expr.get_left());
 	std::any right = evaluate(expr.get_right());
@@ -237,7 +237,7 @@ Interpreter::visit_binary_expr(const Binary& expr) const
 // ====================================================================================================================
 
 std::any
-Interpreter::visit_ternary_expr(const Ternary& expr) const
+Interpreter::visit_ternary_expr(const Ternary& expr)
 {
 	if (is_truthy(evaluate(expr.get_condition()))) {
 		return evaluate(expr.get_then_branch());
@@ -249,7 +249,7 @@ Interpreter::visit_ternary_expr(const Ternary& expr) const
 // ====================================================================================================================
 
 std::any
-Interpreter::visit_grouping_expr(const Grouping& expr) const
+Interpreter::visit_grouping_expr(const Grouping& expr)
 {
 	return evaluate(expr.get_expr());
 }
@@ -257,15 +257,23 @@ Interpreter::visit_grouping_expr(const Grouping& expr) const
 // =====================================================================================================================
 
 std::any
-Interpreter::visit_literal_expr(const Literal& expr) const
+Interpreter::visit_literal_expr(const Literal& expr)
 {
 	return expr.get_value();
+}
+
+// ====================================================================================================================
+
+std::any
+Interpreter::visit_variable_expr(const Variable& expr)
+{
+	return m_environment[expr.get_name()];
 }
 
 // =====================================================================================================================
 
 std::any
-Interpreter::visit_unary_expr(const Unary& expr) const
+Interpreter::visit_unary_expr(const Unary& expr)
 {
 	const std::any right = evaluate(expr.get_right());
 
@@ -288,9 +296,9 @@ Interpreter::visit_unary_expr(const Unary& expr) const
 // ====================================================================================================================
 
 std::any
-Interpreter::visit_var_stmt(const Var& stmt) const
+Interpreter::visit_var_stmt(const Var& stmt)
 {
-	std::any value;
+	std::any value = Value();
 	if (stmt.get_initializer()) {
 		value = evaluate(stmt.get_initializer());
 	}
@@ -301,7 +309,7 @@ Interpreter::visit_var_stmt(const Var& stmt) const
 // =====================================================================================================================
 
 std::any
-Interpreter::visit_expression_stmt(const Expression& stmt) const
+Interpreter::visit_expression_stmt(const Expression& stmt)
 {
 	std::ignore = evaluate(stmt.get_expr());
 	return Value();
@@ -310,7 +318,7 @@ Interpreter::visit_expression_stmt(const Expression& stmt) const
 // =====================================================================================================================
 
 std::any
-Interpreter::visit_print_stmt(const Print& stmt) const
+Interpreter::visit_print_stmt(const Print& stmt)
 {
 	std::any result = evaluate(stmt.get_expr());
 	std::cout << stringify(result, true) << std::endl;
@@ -321,14 +329,14 @@ Interpreter::visit_print_stmt(const Print& stmt) const
 // Private methods
 
 std::any
-Interpreter::evaluate(const std::shared_ptr<const Expr>& expr) const
+Interpreter::evaluate(const std::shared_ptr<const Expr>& expr)
 {
 	require_assert(expr);
 	return expr->accept(*this);
 }
 
 void
-Interpreter::execute(const std::shared_ptr<const Stmt>& statement) const
+Interpreter::execute(const std::shared_ptr<const Stmt>& statement)
 {
 	std::ignore = statement->accept(*this);
 }

@@ -14,7 +14,9 @@ public:
 	Environment();
 
 	void define(const Token& name, const std::any& value);
-	std::any get(const Token& name);
+
+	std::any operator[](const Token& name);
+	const std::any& operator[](const Token& name) const;
 
 private:
 	std::unordered_map<std::string, std::any> m_values;

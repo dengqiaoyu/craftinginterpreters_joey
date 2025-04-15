@@ -6,7 +6,7 @@
 // Public methods
 
 std::string
-RpnPrinter::convert_string(const Expr& expr) const
+RpnPrinter::convert_string(const Expr& expr)
 {
 	return std::any_cast<std::string>(expr.accept(*this));
 }
@@ -14,7 +14,7 @@ RpnPrinter::convert_string(const Expr& expr) const
 // =====================================================================================================================
 
 std::any
-RpnPrinter::visit_binary_expr(const Binary& expr) const
+RpnPrinter::visit_binary_expr(const Binary& expr)
 {
 	return std::format("{} {} {}", std::any_cast<std::string>(expr.get_left()->accept(*this)),
 		std::any_cast<std::string>(expr.get_right()->accept(*this)), expr.get_opr().get_lexeme());
@@ -23,7 +23,7 @@ RpnPrinter::visit_binary_expr(const Binary& expr) const
 // =====================================================================================================================
 
 std::any
-RpnPrinter::visit_ternary_expr(const Ternary& expr) const
+RpnPrinter::visit_ternary_expr(const Ternary& expr)
 {
 	return std::format("{} {} {} {}", std::any_cast<std::string>(expr.get_condition()->accept(*this)),
 		std::any_cast<std::string>(expr.get_then_branch()->accept(*this)),
@@ -33,7 +33,7 @@ RpnPrinter::visit_ternary_expr(const Ternary& expr) const
 // =====================================================================================================================
 
 std::any
-RpnPrinter::visit_grouping_expr(const Grouping& expr) const
+RpnPrinter::visit_grouping_expr(const Grouping& expr)
 {
 	return expr.get_expr()->accept(*this);
 }
@@ -41,7 +41,7 @@ RpnPrinter::visit_grouping_expr(const Grouping& expr) const
 // =====================================================================================================================
 
 std::any
-RpnPrinter::visit_literal_expr(const Literal& expr) const
+RpnPrinter::visit_literal_expr(const Literal& expr)
 {
 	return std::format("{}", expr.get_value());
 }
@@ -49,7 +49,15 @@ RpnPrinter::visit_literal_expr(const Literal& expr) const
 // =====================================================================================================================
 
 std::any
-RpnPrinter::visit_unary_expr(const Unary& expr) const
+RpnPrinter::visit_variable_expr(const Variable& expr)
+{
+	return std::format("(var {})", expr.get_name().get_lexeme());
+}
+
+// =====================================================================================================================
+
+std::any
+RpnPrinter::visit_unary_expr(const Unary& expr)
 {
 	return std::format("{} {}", std::any_cast<std::string>(expr.get_right()->accept(*this)),
 		expr.get_opr().get_lexeme());

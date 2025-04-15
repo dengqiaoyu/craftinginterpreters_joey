@@ -41,7 +41,10 @@ Parser::parse()
 	std::vector<std::shared_ptr<Stmt>> statements;
 
 	while (!is_at_end()) {
-		statements.push_back(declaration());
+		std::shared_ptr<Stmt> statement = declaration();
+		if (statement != nullptr) {
+			statements.push_back(statement);
+		}
 	}
 
 	return statements;
@@ -224,7 +227,7 @@ Parser::primary() // NOLINT(misc-no-recursion)
 	if (match(TokenType::NUMBER, TokenType::STRING)) {
 		return std::make_shared<Literal>(previous().get_literal());
 	}
-	if (match(TokenType::VAR)) {
+	if (match(TokenType::IDENTIFIER)) {
 		return std::make_shared<Variable>(previous());
 	}
 	if (match(TokenType::LEFT_PAREN)) {

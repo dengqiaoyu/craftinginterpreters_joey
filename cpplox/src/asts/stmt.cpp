@@ -19,8 +19,7 @@ operator<<(std::ostream& out_s, const Stmt& stmt)
 template <>
 struct std::formatter<Stmt> : std::formatter<std::string> // NOLINT(altera-struct-pack-align)
 {
-	auto
-	format(const Stmt& stmt, format_context& ctx) const
+	auto format(const Stmt& stmt, format_context& ctx) const
 	{
 		return std::formatter<std::string>::format(stmt.to_string(), ctx);
 	}
@@ -48,7 +47,7 @@ Var::get_initializer() const
 }
 
 std::any
-Var::accept(const StmtVisitor& visitor) const
+Var::accept(StmtVisitor& visitor) const
 {
 	return visitor.visit_var_stmt(*this);
 }
@@ -62,8 +61,7 @@ Var::to_string() const
 // =====================================================================================================================
 // Expression
 
-Expression::Expression(std::shared_ptr<const Expr> expr)
-	: m_expr(std::move(expr))
+Expression::Expression(std::shared_ptr<const Expr> expr) : m_expr(std::move(expr))
 {
 	// Empty constructor.
 }
@@ -75,7 +73,7 @@ Expression::get_expr() const
 }
 
 std::any
-Expression::accept(const StmtVisitor& visitor) const
+Expression::accept(StmtVisitor& visitor) const
 {
 	return visitor.visit_expression_stmt(*this);
 }
@@ -89,8 +87,7 @@ Expression::to_string() const
 // =====================================================================================================================
 // Print
 
-Print::Print(std::shared_ptr<const Expr> expr)
-	: m_expr(std::move(expr))
+Print::Print(std::shared_ptr<const Expr> expr) : m_expr(std::move(expr))
 {
 	// Empty constructor.
 }
@@ -102,7 +99,7 @@ Print::get_expr() const
 }
 
 std::any
-Print::accept(const StmtVisitor& visitor) const
+Print::accept(StmtVisitor& visitor) const
 {
 	return visitor.visit_print_stmt(*this);
 }
@@ -112,4 +109,3 @@ Print::to_string() const
 {
 	return std::format("Print stmt{{expr={}}}", m_expr->to_string());
 }
-

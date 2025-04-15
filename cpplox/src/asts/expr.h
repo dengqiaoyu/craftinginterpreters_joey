@@ -29,12 +29,12 @@ public:
 	ExprVisitor& operator=(ExprVisitor&&) noexcept = default;
 	virtual ~ExprVisitor();
 
-	[[nodiscard]] virtual std::any visit_binary_expr(const Binary& expr) const = 0;
-	[[nodiscard]] virtual std::any visit_ternary_expr(const Ternary& expr) const = 0;
-	[[nodiscard]] virtual std::any visit_grouping_expr(const Grouping& expr) const = 0;
-	[[nodiscard]] virtual std::any visit_literal_expr(const Literal& expr) const = 0;
-	[[nodiscard]] virtual std::any visit_variable_expr(const Variable& expr) const = 0;
-	[[nodiscard]] virtual std::any visit_unary_expr(const Unary& expr) const = 0;
+	[[nodiscard]] virtual std::any visit_binary_expr(const Binary& expr) = 0;
+	[[nodiscard]] virtual std::any visit_ternary_expr(const Ternary& expr) = 0;
+	[[nodiscard]] virtual std::any visit_grouping_expr(const Grouping& expr) = 0;
+	[[nodiscard]] virtual std::any visit_literal_expr(const Literal& expr) = 0;
+	[[nodiscard]] virtual std::any visit_variable_expr(const Variable& expr) = 0;
+	[[nodiscard]] virtual std::any visit_unary_expr(const Unary& expr) = 0;
 };
 
 // =====================================================================================================================
@@ -49,7 +49,7 @@ public:
 	Expr& operator=(Expr&&) noexcept = default;
 	virtual ~Expr();
 
-	[[nodiscard]] virtual std::any accept(const ExprVisitor& visitor) const = 0;
+	[[nodiscard]] virtual std::any accept(ExprVisitor& visitor) const = 0;
 	[[nodiscard]] virtual std::string to_string() const = 0;
 	friend std::ostream& operator<<(std::ostream& out_s, const Expr& expr);
 };
@@ -64,8 +64,9 @@ public:
 	[[nodiscard]] const Token& get_opr() const;
 	[[nodiscard]] const std::shared_ptr<const Expr>& get_right() const;
 
-	[[nodiscard]] std::any accept(const ExprVisitor& visitor) const override;
+	[[nodiscard]] std::any accept(ExprVisitor& visitor) const override;
 	[[nodiscard]] std::string to_string() const override;
+
 private:
 	std::shared_ptr<const Expr> m_left;
 	Token m_opr;
@@ -76,7 +77,8 @@ private:
 class Ternary : public Expr
 {
 public:
-	Ternary(std::shared_ptr<const Expr> condition, Token qmark, std::shared_ptr<const Expr> then_branch, Token colon, std::shared_ptr<const Expr> else_branch);
+	Ternary(std::shared_ptr<const Expr> condition, Token qmark, std::shared_ptr<const Expr> then_branch, Token colon,
+		std::shared_ptr<const Expr> else_branch);
 
 	[[nodiscard]] const std::shared_ptr<const Expr>& get_condition() const;
 	[[nodiscard]] const Token& get_qmark() const;
@@ -84,8 +86,9 @@ public:
 	[[nodiscard]] const Token& get_colon() const;
 	[[nodiscard]] const std::shared_ptr<const Expr>& get_else_branch() const;
 
-	[[nodiscard]] std::any accept(const ExprVisitor& visitor) const override;
+	[[nodiscard]] std::any accept(ExprVisitor& visitor) const override;
 	[[nodiscard]] std::string to_string() const override;
+
 private:
 	std::shared_ptr<const Expr> m_condition;
 	Token m_qmark;
@@ -102,8 +105,9 @@ public:
 
 	[[nodiscard]] const std::shared_ptr<const Expr>& get_expr() const;
 
-	[[nodiscard]] std::any accept(const ExprVisitor& visitor) const override;
+	[[nodiscard]] std::any accept(ExprVisitor& visitor) const override;
 	[[nodiscard]] std::string to_string() const override;
+
 private:
 	std::shared_ptr<const Expr> m_expr;
 };
@@ -116,8 +120,9 @@ public:
 
 	[[nodiscard]] const Value& get_value() const;
 
-	[[nodiscard]] std::any accept(const ExprVisitor& visitor) const override;
+	[[nodiscard]] std::any accept(ExprVisitor& visitor) const override;
 	[[nodiscard]] std::string to_string() const override;
+
 private:
 	Value m_value;
 };
@@ -130,8 +135,9 @@ public:
 
 	[[nodiscard]] const Token& get_name() const;
 
-	[[nodiscard]] std::any accept(const ExprVisitor& visitor) const override;
+	[[nodiscard]] std::any accept(ExprVisitor& visitor) const override;
 	[[nodiscard]] std::string to_string() const override;
+
 private:
 	Token m_name;
 };
@@ -145,8 +151,9 @@ public:
 	[[nodiscard]] const Token& get_opr() const;
 	[[nodiscard]] const std::shared_ptr<const Expr>& get_right() const;
 
-	[[nodiscard]] std::any accept(const ExprVisitor& visitor) const override;
+	[[nodiscard]] std::any accept(ExprVisitor& visitor) const override;
 	[[nodiscard]] std::string to_string() const override;
+
 private:
 	Token m_opr;
 	std::shared_ptr<const Expr> m_right;

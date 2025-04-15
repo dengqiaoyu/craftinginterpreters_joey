@@ -26,9 +26,9 @@ public:
 	StmtVisitor& operator=(StmtVisitor&&) noexcept = default;
 	virtual ~StmtVisitor();
 
-	[[nodiscard]] virtual std::any visit_var_stmt(const Var& stmt) const = 0;
-	[[nodiscard]] virtual std::any visit_expression_stmt(const Expression& stmt) const = 0;
-	[[nodiscard]] virtual std::any visit_print_stmt(const Print& stmt) const = 0;
+	[[nodiscard]] virtual std::any visit_var_stmt(const Var& stmt) = 0;
+	[[nodiscard]] virtual std::any visit_expression_stmt(const Expression& stmt) = 0;
+	[[nodiscard]] virtual std::any visit_print_stmt(const Print& stmt) = 0;
 };
 
 // =====================================================================================================================
@@ -43,7 +43,7 @@ public:
 	Stmt& operator=(Stmt&&) noexcept = default;
 	virtual ~Stmt();
 
-	[[nodiscard]] virtual std::any accept(const StmtVisitor& visitor) const = 0;
+	[[nodiscard]] virtual std::any accept(StmtVisitor& visitor) const = 0;
 	[[nodiscard]] virtual std::string to_string() const = 0;
 	friend std::ostream& operator<<(std::ostream& out_s, const Stmt& stmt);
 };
@@ -57,8 +57,9 @@ public:
 	[[nodiscard]] const Token& get_name() const;
 	[[nodiscard]] const std::shared_ptr<const Expr>& get_initializer() const;
 
-	[[nodiscard]] std::any accept(const StmtVisitor& visitor) const override;
+	[[nodiscard]] std::any accept(StmtVisitor& visitor) const override;
 	[[nodiscard]] std::string to_string() const override;
+
 private:
 	Token m_name;
 	std::shared_ptr<const Expr> m_initializer;
@@ -72,8 +73,9 @@ public:
 
 	[[nodiscard]] const std::shared_ptr<const Expr>& get_expr() const;
 
-	[[nodiscard]] std::any accept(const StmtVisitor& visitor) const override;
+	[[nodiscard]] std::any accept(StmtVisitor& visitor) const override;
 	[[nodiscard]] std::string to_string() const override;
+
 private:
 	std::shared_ptr<const Expr> m_expr;
 };
@@ -86,8 +88,9 @@ public:
 
 	[[nodiscard]] const std::shared_ptr<const Expr>& get_expr() const;
 
-	[[nodiscard]] std::any accept(const StmtVisitor& visitor) const override;
+	[[nodiscard]] std::any accept(StmtVisitor& visitor) const override;
 	[[nodiscard]] std::string to_string() const override;
+
 private:
 	std::shared_ptr<const Expr> m_expr;
 };
