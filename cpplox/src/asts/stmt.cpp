@@ -25,6 +25,49 @@ struct std::formatter<Stmt> : std::formatter<std::string> // NOLINT(altera-struc
 	}
 };
 
+// Formatter specialization for std::vector<Stmt>
+template <>
+// NOLINTNEXTLINE(altera-struct-pack-align)
+struct std::formatter<std::vector<std::shared_ptr<const Stmt>>> : std::formatter<std::string> {
+	auto format(const std::vector<std::shared_ptr<const Stmt>>& stmts, format_context& ctx) const
+	{
+		std::string result = "[";
+		for (const auto& stmt : stmts) {
+			result += std::format("{}, ", stmt->to_string());
+		}
+		result.pop_back(); // Remove the last space.
+		result.pop_back(); // Remove the last comma.
+		result += "]";
+		return std::formatter<std::string>::format(result, ctx);
+	}
+};
+
+// =====================================================================================================================
+// Block
+
+Block::Block(std::vector<std::shared_ptr<const Stmt>> statements) : m_statements(std::move(statements))
+{
+	// Empty constructor.
+}
+
+const std::vector<std::shared_ptr<const Stmt>>&
+Block::get_statements() const
+{
+	return m_statements;
+}
+
+std::any
+Block::accept(StmtVisitor& visitor) const
+{
+	return visitor.visit_block_stmt(*this);
+}
+
+std::string
+Block::to_string() const
+{
+	return std::format("Block stmt{{statements={}}}", m_statements);
+}
+
 // =====================================================================================================================
 // Expression
 

@@ -54,6 +54,12 @@ is_ptr_type(const std::string& type)
 }
 
 static bool
+is_vector_type(const std::string& type)
+{
+	return type.find("vector") != std::string::npos;
+}
+
+static bool
 is_shared_ptr_type(const std::string& type)
 {
 	return type.find("shared_ptr") != std::string::npos;
@@ -275,6 +281,28 @@ generate_ast(const std::string& output_dir_path, const std::vector<std::string>&
 	cs << fmt_str("	}\n");
 	cs << fmt_str("};\n\n");
 
+	// Add vector formatter specialization for Stmt
+	if (base_class_name == "Stmt") {
+		cs << fmt_str("// Formatter specialization for std::vector<%s>\n", bcls_n);
+		cs << fmt_str("template <>\n");
+		cs << fmt_str("// NOLINTNEXTLINE(altera-struct-pack-align)\n");
+		cs << fmt_str("struct std::formatter<std::vector<std::shared_ptr<const %s>>> : std::formatter<std::string> {\n",
+			bcls_n);
+		cs << fmt_str("	auto format(const std::vector<std::shared_ptr<const %s>>& %ss, format_context& ctx) const\n",
+			bcls_n, bvar_n);
+		cs << fmt_str("	{\n");
+		cs << fmt_str("		std::string result = \"[\";\n");
+		cs << fmt_str("		for (const auto& %s : %ss) {\n", bvar_n, bvar_n);
+		cs << fmt_str("			result += std::format(\"{}, \", %s->to_string());\n", bvar_n);
+		cs << fmt_str("		}\n");
+		cs << fmt_str("		result.pop_back(); // Remove the last space.\n");
+		cs << fmt_str("		result.pop_back(); // Remove the last comma.\n");
+		cs << fmt_str("		result += \"]\";\n");
+		cs << fmt_str("		return std::formatter<std::string>::format(result, ctx);\n");
+		cs << fmt_str("	}\n");
+		cs << fmt_str("};\n\n");
+	}
+
 	// Derived class implementations
 	for (const auto& ast_class : ast_classes) {
 		const std::string& class_name = ast_class.get_class_name();
@@ -343,7 +371,10 @@ generate_ast(const std::string& output_dir_path, const std::vector<std::string>&
 		}
 		cs << "}}\", ";
 		for (size_t i = 0; i < members.size(); ++i) {
-			if (is_ptr_type(members[i].first)) {
+			if (is_vector_type(members[i].first) && is_ptr_type(members[i].first)) {
+				// vector of shared_ptr's std::formatter is already defined.
+				cs << fmt_str("m_%s", members[i].second.c_str());
+			} else if (is_ptr_type(members[i].first)) {
 				cs << fmt_str("m_%s->to_string()", members[i].second.c_str());
 			} else {
 				cs << fmt_str("m_%s.to_string()", members[i].second.c_str());
@@ -417,8 +448,14 @@ main()
 	std::cout << std::format("======================") << std::endl;
 
 	// clang-format off
-	generate_ast("src/asts", {"\"expr.h\"", "\"token.h\""}, "Stmt",
+	generate_ast("src/asts", {"<vector>", "\"expr.h\"", "\"token.h\""},
+		"Stmt",
 		{
+			ASTClass("Block",
+				{
+					{"std::vector<std::shared_ptr<const Stmt>>", "statements"}
+				}
+			),
 			ASTClass("Expression",
 				{
 					{"std::shared_ptr<const Expr>",	"expr"}
