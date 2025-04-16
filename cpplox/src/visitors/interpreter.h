@@ -2,6 +2,7 @@
 #define INTERPRETER_H
 
 #include <any>
+#include <memory>
 
 #include "asts/expr.h"
 #include "asts/stmt.h"
@@ -29,7 +30,7 @@ public:
 	void interpret(const std::vector<std::shared_ptr<Stmt>>& statements);
 
 private:
-	Environment m_environment;
+	std::unique_ptr<Environment> m_environment;
 
 	[[nodiscard]] std::any evaluate(const std::shared_ptr<const Expr>& expr);
 	void execute(const std::shared_ptr<const Stmt>& statement);

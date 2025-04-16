@@ -32,7 +32,7 @@ Environment::assign(const Token& name, const std::any& value)
 // =====================================================================================================================
 
 std::any
-Environment::operator[](const Token& name)
+Environment::get(const Token& name)
 {
 	auto it = m_values.find(name.get_lexeme());
 	if (it != m_values.end()) {
@@ -44,11 +44,27 @@ Environment::operator[](const Token& name)
 // =====================================================================================================================
 
 const std::any&
-Environment::operator[](const Token& name) const
+Environment::get(const Token& name) const
 {
 	auto it = m_values.find(name.get_lexeme());
 	if (it != m_values.end()) {
 		return it->second;
 	}
 	throw RuntimeError(name, std::format("Undefined variable '{}'.", name.get_lexeme()));
+}
+
+// =====================================================================================================================
+
+std::any
+Environment::operator[](const Token& name)
+{
+	return this->get(name);
+}
+
+// =====================================================================================================================
+
+const std::any&
+Environment::operator[](const Token& name) const
+{
+	return this->get(name);
 }

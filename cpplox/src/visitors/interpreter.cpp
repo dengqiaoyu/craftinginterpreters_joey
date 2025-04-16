@@ -158,7 +158,10 @@ stringify(const std::any& any, const bool is_print_statement = false)
 
 // =====================================================================================================================
 
-Interpreter::Interpreter() = default;
+Interpreter::Interpreter() : m_environment(std::make_unique<Environment>())
+{
+	// Empty constructor.
+}
 
 // =====================================================================================================================
 
@@ -182,7 +185,7 @@ std::any
 Interpreter::visit_assign_expr(const Assign& expr)
 {
 	std::any value = evaluate(expr.get_value());
-	m_environment.assign(expr.get_name(), value);
+	m_environment->assign(expr.get_name(), value);
 	return value;
 }
 
@@ -276,7 +279,7 @@ Interpreter::visit_literal_expr(const Literal& expr)
 std::any
 Interpreter::visit_variable_expr(const Variable& expr)
 {
-	return m_environment[expr.get_name()];
+	return m_environment->get(expr.get_name());
 }
 
 // =====================================================================================================================
@@ -311,7 +314,7 @@ Interpreter::visit_var_stmt(const Var& stmt)
 	if (stmt.get_initializer()) {
 		value = evaluate(stmt.get_initializer());
 	}
-	m_environment.define(stmt.get_name(), value);
+	m_environment->define(stmt.get_name(), value);
 	return Value();
 }
 

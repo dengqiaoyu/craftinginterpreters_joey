@@ -16,6 +16,9 @@ public:
 	void define(const Token& name, const std::any& value);
 	void assign(const Token& name, const std::any& value);
 
+	std::any get(const Token& name);
+	const std::any& get(const Token& name) const;
+
 	std::any operator[](const Token& name);
 	const std::any& operator[](const Token& name) const;
 
