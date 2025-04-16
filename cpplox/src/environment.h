@@ -2,6 +2,7 @@
 #define ENVIRONMENT_H
 
 #include <any>
+#include <memory>
 #include <string>
 #include <unordered_map>
 
@@ -11,18 +12,15 @@ class Environment
 {
 
 public:
-	Environment();
+	explicit Environment(std::unique_ptr<Environment> enclosing = nullptr);
 
 	void define(const Token& name, const std::any& value);
 	void assign(const Token& name, const std::any& value);
 
 	std::any get(const Token& name);
-	const std::any& get(const Token& name) const;
-
-	std::any operator[](const Token& name);
-	const std::any& operator[](const Token& name) const;
 
 private:
+	std::unique_ptr<Environment> m_enclosing;
 	std::unordered_map<std::string, std::any> m_values;
 };
 
