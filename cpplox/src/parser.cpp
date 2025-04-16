@@ -93,7 +93,26 @@ Parser::conditional_expression() // NOLINT(misc-no-recursion)
 std::shared_ptr<Expr>
 Parser::expression() // NOLINT(misc-no-recursion)
 {
-	return equality();
+	return assignment();
+}
+
+// =====================================================================================================================
+
+// <assignment> -> IDENTIFIER "=" <assignment> | <equality>
+std::shared_ptr<Expr>
+Parser::assignment() // NOLINT(misc-no-recursion)
+{
+	std::shared_ptr<Expr> expr = equality();
+	if (match(TokenType::EQUAL)) {
+		const Token& equals = previous();
+		std::shared_ptr<Expr> value = assignment();
+		if (std::shared_ptr<Variable> variable = std::dynamic_pointer_cast<Variable>(expr)) {
+			const Token& name = variable->get_name();
+			return std::make_shared<Assign>(name, value);
+		}
+		error(equals, "Invalid assignment target.");
+	}
+	return expr;
 }
 
 // =====================================================================================================================

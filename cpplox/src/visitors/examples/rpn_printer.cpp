@@ -14,6 +14,15 @@ RpnPrinter::convert_string(const Expr& expr)
 // =====================================================================================================================
 
 std::any
+RpnPrinter::visit_assign_expr(const Assign& expr)
+{
+	return std::format("(= {} {})", expr.get_name().get_lexeme(),
+		std::any_cast<std::string>(expr.get_value()->accept(*this)));
+}
+
+// =====================================================================================================================
+
+std::any
 RpnPrinter::visit_binary_expr(const Binary& expr)
 {
 	return std::format("{} {} {}", std::any_cast<std::string>(expr.get_left()->accept(*this)),

@@ -10,6 +10,12 @@ AstPrinter::convert_string(const Expr& expr)
 }
 
 std::any
+AstPrinter::visit_assign_expr(const Assign& expr)
+{
+	return parenthesize("assign", expr.get_name(), expr.get_value());
+}
+
+std::any
 AstPrinter::visit_binary_expr(const Binary& expr)
 {
 	return parenthesize(expr.get_opr().get_lexeme(), expr.get_left(), expr.get_right());

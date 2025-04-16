@@ -14,6 +14,7 @@ public:
 	Environment();
 
 	void define(const Token& name, const std::any& value);
+	void assign(const Token& name, const std::any& value);
 
 	std::any operator[](const Token& name);
 	const std::any& operator[](const Token& name) const;

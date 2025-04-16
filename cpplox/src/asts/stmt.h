@@ -10,9 +10,9 @@
 #include "token.h"
 
 // Forward declarations.
-class Var;
 class Expression;
 class Print;
+class Var;
 
 // =====================================================================================================================
 // Visitor class
@@ -26,9 +26,9 @@ public:
 	StmtVisitor& operator=(StmtVisitor&&) noexcept = default;
 	virtual ~StmtVisitor();
 
-	[[nodiscard]] virtual std::any visit_var_stmt(const Var& stmt) = 0;
 	[[nodiscard]] virtual std::any visit_expression_stmt(const Expression& stmt) = 0;
 	[[nodiscard]] virtual std::any visit_print_stmt(const Print& stmt) = 0;
+	[[nodiscard]] virtual std::any visit_var_stmt(const Var& stmt) = 0;
 };
 
 // =====================================================================================================================
@@ -46,23 +46,6 @@ public:
 	[[nodiscard]] virtual std::any accept(StmtVisitor& visitor) const = 0;
 	[[nodiscard]] virtual std::string to_string() const = 0;
 	friend std::ostream& operator<<(std::ostream& out_s, const Stmt& stmt);
-};
-
-// =====================================================================================================================
-class Var : public Stmt
-{
-public:
-	Var(Token name, std::shared_ptr<const Expr> initializer);
-
-	[[nodiscard]] const Token& get_name() const;
-	[[nodiscard]] const std::shared_ptr<const Expr>& get_initializer() const;
-
-	[[nodiscard]] std::any accept(StmtVisitor& visitor) const override;
-	[[nodiscard]] std::string to_string() const override;
-
-private:
-	Token m_name;
-	std::shared_ptr<const Expr> m_initializer;
 };
 
 // =====================================================================================================================
@@ -93,6 +76,23 @@ public:
 
 private:
 	std::shared_ptr<const Expr> m_expr;
+};
+
+// =====================================================================================================================
+class Var : public Stmt
+{
+public:
+	Var(Token name, std::shared_ptr<const Expr> initializer);
+
+	[[nodiscard]] const Token& get_name() const;
+	[[nodiscard]] const std::shared_ptr<const Expr>& get_initializer() const;
+
+	[[nodiscard]] std::any accept(StmtVisitor& visitor) const override;
+	[[nodiscard]] std::string to_string() const override;
+
+private:
+	Token m_name;
+	std::shared_ptr<const Expr> m_initializer;
 };
 
 #endif // stmt_H

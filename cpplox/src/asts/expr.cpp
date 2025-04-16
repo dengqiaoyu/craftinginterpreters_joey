@@ -26,6 +26,38 @@ struct std::formatter<Expr> : std::formatter<std::string> // NOLINT(altera-struc
 };
 
 // =====================================================================================================================
+// Assign
+
+Assign::Assign(Token name, std::shared_ptr<const Expr> value) : m_name(std::move(name)), m_value(std::move(value))
+{
+	// Empty constructor.
+}
+
+const Token&
+Assign::get_name() const
+{
+	return m_name;
+}
+
+const std::shared_ptr<const Expr>&
+Assign::get_value() const
+{
+	return m_value;
+}
+
+std::any
+Assign::accept(ExprVisitor& visitor) const
+{
+	return visitor.visit_assign_expr(*this);
+}
+
+std::string
+Assign::to_string() const
+{
+	return std::format("Assign expr{{name={}, value={}}}", m_name.to_string(), m_value->to_string());
+}
+
+// =====================================================================================================================
 // Binary
 
 Binary::Binary(std::shared_ptr<const Expr> left, Token opr, std::shared_ptr<const Expr> right)
@@ -63,6 +95,58 @@ Binary::to_string() const
 {
 	return std::format("Binary expr{{left={}, opr={}, right={}}}", m_left->to_string(), m_opr.to_string(),
 		m_right->to_string());
+}
+
+// =====================================================================================================================
+// Grouping
+
+Grouping::Grouping(std::shared_ptr<const Expr> expr) : m_expr(std::move(expr))
+{
+	// Empty constructor.
+}
+
+const std::shared_ptr<const Expr>&
+Grouping::get_expr() const
+{
+	return m_expr;
+}
+
+std::any
+Grouping::accept(ExprVisitor& visitor) const
+{
+	return visitor.visit_grouping_expr(*this);
+}
+
+std::string
+Grouping::to_string() const
+{
+	return std::format("Grouping expr{{expr={}}}", m_expr->to_string());
+}
+
+// =====================================================================================================================
+// Literal
+
+Literal::Literal(Value value) : m_value(std::move(value))
+{
+	// Empty constructor.
+}
+
+const Value&
+Literal::get_value() const
+{
+	return m_value;
+}
+
+std::any
+Literal::accept(ExprVisitor& visitor) const
+{
+	return visitor.visit_literal_expr(*this);
+}
+
+std::string
+Literal::to_string() const
+{
+	return std::format("Literal expr{{value={}}}", m_value.to_string());
 }
 
 // =====================================================================================================================
@@ -121,84 +205,6 @@ Ternary::to_string() const
 }
 
 // =====================================================================================================================
-// Grouping
-
-Grouping::Grouping(std::shared_ptr<const Expr> expr) : m_expr(std::move(expr))
-{
-	// Empty constructor.
-}
-
-const std::shared_ptr<const Expr>&
-Grouping::get_expr() const
-{
-	return m_expr;
-}
-
-std::any
-Grouping::accept(ExprVisitor& visitor) const
-{
-	return visitor.visit_grouping_expr(*this);
-}
-
-std::string
-Grouping::to_string() const
-{
-	return std::format("Grouping expr{{expr={}}}", m_expr->to_string());
-}
-
-// =====================================================================================================================
-// Literal
-
-Literal::Literal(Value value) : m_value(std::move(value))
-{
-	// Empty constructor.
-}
-
-const Value&
-Literal::get_value() const
-{
-	return m_value;
-}
-
-std::any
-Literal::accept(ExprVisitor& visitor) const
-{
-	return visitor.visit_literal_expr(*this);
-}
-
-std::string
-Literal::to_string() const
-{
-	return std::format("Literal expr{{value={}}}", m_value.to_string());
-}
-
-// =====================================================================================================================
-// Variable
-
-Variable::Variable(Token name) : m_name(std::move(name))
-{
-	// Empty constructor.
-}
-
-const Token&
-Variable::get_name() const
-{
-	return m_name;
-}
-
-std::any
-Variable::accept(ExprVisitor& visitor) const
-{
-	return visitor.visit_variable_expr(*this);
-}
-
-std::string
-Variable::to_string() const
-{
-	return std::format("Variable expr{{name={}}}", m_name.to_string());
-}
-
-// =====================================================================================================================
 // Unary
 
 Unary::Unary(Token opr, std::shared_ptr<const Expr> right) : m_opr(std::move(opr)), m_right(std::move(right))
@@ -228,4 +234,30 @@ std::string
 Unary::to_string() const
 {
 	return std::format("Unary expr{{opr={}, right={}}}", m_opr.to_string(), m_right->to_string());
+}
+
+// =====================================================================================================================
+// Variable
+
+Variable::Variable(Token name) : m_name(std::move(name))
+{
+	// Empty constructor.
+}
+
+const Token&
+Variable::get_name() const
+{
+	return m_name;
+}
+
+std::any
+Variable::accept(ExprVisitor& visitor) const
+{
+	return visitor.visit_variable_expr(*this);
+}
+
+std::string
+Variable::to_string() const
+{
+	return std::format("Variable expr{{name={}}}", m_name.to_string());
 }

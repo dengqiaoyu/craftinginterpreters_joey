@@ -177,6 +177,15 @@ Interpreter::interpret(const std::vector<std::shared_ptr<Stmt>>& statements)
 // =====================================================================================================================
 // Visit expression.
 
+// ====================================================================================================================
+std::any
+Interpreter::visit_assign_expr(const Assign& expr)
+{
+	std::any value = evaluate(expr.get_value());
+	m_environment.assign(expr.get_name(), value);
+	return value;
+}
+
 // =====================================================================================================================
 
 std::any

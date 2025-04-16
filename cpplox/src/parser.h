@@ -36,7 +36,9 @@ private:
 	 * comma_expression			-> expression ( "," expression )* ;
 	 * conditional_expression	-> expression ? expression : conditional_expression:
 	 *							| expression
-	 * expression				-> equality ;
+	 * expression				-> assignment ;
+	 * assignment				-> IDENTIFIER "=" assignment
+	 *							| equality ;
 	 * equality					-> comparison ( ( "!=" | "==" ) comparison )* ;
 	 * comparison				-> term ( ( ">" | ">=" | "<" | "<=" ) term )* ;
 	 * term						-> factor ( ( "-" | "+" ) factor )* ;
@@ -51,6 +53,7 @@ private:
 	std::shared_ptr<Expr> comma_expression();
 	std::shared_ptr<Expr> conditional_expression();
 	std::shared_ptr<Expr> expression();
+	std::shared_ptr<Expr> assignment();
 	std::shared_ptr<Expr> equality();
 	std::shared_ptr<Expr> comparison();
 	std::shared_ptr<Expr> term();

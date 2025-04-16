@@ -13,6 +13,7 @@ public:
 	Interpreter();
 
 	// Visit expression.
+	[[nodiscard]] std::any visit_assign_expr(const Assign& expr) override;
 	[[nodiscard]] std::any visit_binary_expr(const Binary& expr) override;
 	[[nodiscard]] std::any visit_ternary_expr(const Ternary& expr) override;
 	[[nodiscard]] std::any visit_grouping_expr(const Grouping& expr) override;

@@ -18,6 +18,19 @@ Environment::define(const Token& name, const std::any& value)
 
 // =====================================================================================================================
 
+void
+Environment::assign(const Token& name, const std::any& value)
+{
+	auto it = m_values.find(name.get_lexeme());
+	if (it != m_values.end()) {
+		it->second = value;
+		return;
+	}
+	throw RuntimeError(name, std::format("Undefined variable '{}'.", name.get_lexeme()));
+}
+
+// =====================================================================================================================
+
 std::any
 Environment::operator[](const Token& name)
 {

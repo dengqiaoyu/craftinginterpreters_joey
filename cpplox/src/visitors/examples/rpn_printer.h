@@ -10,6 +10,7 @@ class RpnPrinter : public ExprVisitor
 {
 public:
 	[[nodiscard]] std::string convert_string(const Expr& expr);
+	[[nodiscard]] std::any visit_assign_expr(const Assign& expr) override;
 	[[nodiscard]] std::any visit_binary_expr(const Binary& expr) override;
 	[[nodiscard]] std::any visit_ternary_expr(const Ternary& expr) override;
 	[[nodiscard]] std::any visit_grouping_expr(const Grouping& expr) override;

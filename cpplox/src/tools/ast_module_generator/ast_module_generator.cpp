@@ -368,20 +368,17 @@ main()
 	generate_ast("src/asts", {"\"token.h\"", "\"value.h\""}, "Expr",
 		// clang-format off
 		{
+			ASTClass("Assign",
+				{
+					{"Token",						"name"},
+					{"std::shared_ptr<const Expr>",	"value"}
+				}
+			),
 			ASTClass("Binary",
 				{
 					{"std::shared_ptr<const Expr>",	"left"},
 					{"Token",						"opr"},
 					{"std::shared_ptr<const Expr>",	"right"}
-				}
-			),
-			ASTClass("Ternary",
-				{
-					{"std::shared_ptr<const Expr>",	"condition"},
-					{"Token",						"qmark"},
-					{"std::shared_ptr<const Expr>",	"then_branch"},
-					{"Token",						"colon"},
-					{"std::shared_ptr<const Expr>",	"else_branch"}
 				}
 			),
 			ASTClass("Grouping",
@@ -394,10 +391,13 @@ main()
 					{"Value", 						"value"}
 				}
 			),
-			ASTClass(
-				"Variable",
+			ASTClass("Ternary",
 				{
-					{"Token",						"name"}
+					{"std::shared_ptr<const Expr>",	"condition"},
+					{"Token",						"qmark"},
+					{"std::shared_ptr<const Expr>",	"then_branch"},
+					{"Token",						"colon"},
+					{"std::shared_ptr<const Expr>",	"else_branch"}
 				}
 			),
 			ASTClass("Unary",
@@ -405,7 +405,12 @@ main()
 					{"Token",						"opr"},
 					{"std::shared_ptr<const Expr>",	"right"}
 				}
-			)
+			),
+			ASTClass("Variable",
+				{
+					{"Token",						"name"}
+				}
+			),
 		} // clang-format on
 	);
 
@@ -414,12 +419,6 @@ main()
 	// clang-format off
 	generate_ast("src/asts", {"\"expr.h\"", "\"token.h\""}, "Stmt",
 		{
-			ASTClass("Var",
-				{
-					{"Token",						"name"},
-					{"std::shared_ptr<const Expr>",	"initializer"}
-				}
-			),
 			ASTClass("Expression",
 				{
 					{"std::shared_ptr<const Expr>",	"expr"}
@@ -428,6 +427,12 @@ main()
 			ASTClass("Print",
 				{
 					{"std::shared_ptr<const Expr>",	"expr"}
+				}
+			),
+			ASTClass("Var",
+				{
+					{"Token",						"name"},
+					{"std::shared_ptr<const Expr>",	"initializer"}
 				}
 			),
 		}

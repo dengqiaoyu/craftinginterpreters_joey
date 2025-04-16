@@ -26,39 +26,6 @@ struct std::formatter<Stmt> : std::formatter<std::string> // NOLINT(altera-struc
 };
 
 // =====================================================================================================================
-// Var
-
-Var::Var(Token name, std::shared_ptr<const Expr> initializer)
-	: m_name(std::move(name)), m_initializer(std::move(initializer))
-{
-	// Empty constructor.
-}
-
-const Token&
-Var::get_name() const
-{
-	return m_name;
-}
-
-const std::shared_ptr<const Expr>&
-Var::get_initializer() const
-{
-	return m_initializer;
-}
-
-std::any
-Var::accept(StmtVisitor& visitor) const
-{
-	return visitor.visit_var_stmt(*this);
-}
-
-std::string
-Var::to_string() const
-{
-	return std::format("Var stmt{{name={}, initializer={}}}", m_name.to_string(), m_initializer->to_string());
-}
-
-// =====================================================================================================================
 // Expression
 
 Expression::Expression(std::shared_ptr<const Expr> expr) : m_expr(std::move(expr))
@@ -108,4 +75,37 @@ std::string
 Print::to_string() const
 {
 	return std::format("Print stmt{{expr={}}}", m_expr->to_string());
+}
+
+// =====================================================================================================================
+// Var
+
+Var::Var(Token name, std::shared_ptr<const Expr> initializer)
+	: m_name(std::move(name)), m_initializer(std::move(initializer))
+{
+	// Empty constructor.
+}
+
+const Token&
+Var::get_name() const
+{
+	return m_name;
+}
+
+const std::shared_ptr<const Expr>&
+Var::get_initializer() const
+{
+	return m_initializer;
+}
+
+std::any
+Var::accept(StmtVisitor& visitor) const
+{
+	return visitor.visit_var_stmt(*this);
+}
+
+std::string
+Var::to_string() const
+{
+	return std::format("Var stmt{{name={}, initializer={}}}", m_name.to_string(), m_initializer->to_string());
 }
