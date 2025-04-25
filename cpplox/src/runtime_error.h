@@ -18,7 +18,7 @@ public:
 	}
 
 	~RuntimeError() override;
-	RuntimeError(const RuntimeError&) = delete;
+	RuntimeError(const RuntimeError&) noexcept = default;
 	RuntimeError& operator=(const RuntimeError&) = delete;
 	RuntimeError(RuntimeError&&) = delete;
 	RuntimeError& operator=(RuntimeError&&) = delete;

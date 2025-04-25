@@ -12,7 +12,7 @@ class Environment
 {
 
 public:
-	explicit Environment(std::unique_ptr<Environment> enclosing = nullptr);
+	explicit Environment(Environment* enclosing = nullptr);
 
 	void define(const Token& name, const std::any& value);
 	void assign(const Token& name, const std::any& value);
@@ -20,7 +20,7 @@ public:
 	std::any get(const Token& name);
 
 private:
-	std::unique_ptr<Environment> m_enclosing;
+	Environment* m_enclosing;
 	std::unordered_map<std::string, std::any> m_values;
 };
 

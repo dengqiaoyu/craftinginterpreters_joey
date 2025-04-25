@@ -265,7 +265,7 @@ Parser::primary() // NOLINT(misc-no-recursion)
 // declaration -> variable_declaration | statement
 
 std::shared_ptr<Stmt>
-Parser::declaration()
+Parser::declaration() // NOLINT(misc-no-recursion)
 {
 	try {
 		if (match(TokenType::VAR)) {
@@ -297,10 +297,13 @@ Parser::variable_declaration()
 // statement	-> <expr_stmt> | <print_stmt>
 
 std::shared_ptr<Stmt>
-Parser::statement()
+Parser::statement() // NOLINT(misc-no-recursion)
 {
 	if (match(TokenType::PRINT)) {
 		return print_statement();
+	}
+	if (match(TokenType::LEFT_BRACE)) {
+		return std::make_shared<Block>(block());
 	}
 	return expression_statement();
 }
@@ -323,6 +326,22 @@ Parser::print_statement()
 	std::shared_ptr<Expr> expr = expression();
 	consume(TokenType::SEMICOLON, "Expect ';' after expression.");
 	return std::make_shared<Print>(expr);
+}
+
+// =====================================================================================================================
+// block -> "{" <declaration>* "}"
+std::vector<std::shared_ptr<const Stmt>>
+Parser::block() // NOLINT(misc-no-recursion)
+{
+	std::vector<std::shared_ptr<const Stmt>> statements;
+	while (!check(TokenType::RIGHT_BRACE) && !is_at_end()) {
+		std::shared_ptr<const Stmt> statement = declaration();
+		if (statement != nullptr) {
+			statements.push_back(statement);
+		}
+	}
+	consume(TokenType::RIGHT_BRACE, "Expect '}' after block.");
+	return statements;
 }
 
 // =====================================================================================================================

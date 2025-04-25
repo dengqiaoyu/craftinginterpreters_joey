@@ -67,6 +67,7 @@ public:
 
 	[[nodiscard]] std::any accept(ExprVisitor& visitor) const override;
 	[[nodiscard]] std::string to_string() const override;
+
 private:
 	Token m_name;
 	std::shared_ptr<const Expr> m_value;
@@ -84,6 +85,7 @@ public:
 
 	[[nodiscard]] std::any accept(ExprVisitor& visitor) const override;
 	[[nodiscard]] std::string to_string() const override;
+
 private:
 	std::shared_ptr<const Expr> m_left;
 	Token m_opr;
@@ -100,6 +102,7 @@ public:
 
 	[[nodiscard]] std::any accept(ExprVisitor& visitor) const override;
 	[[nodiscard]] std::string to_string() const override;
+
 private:
 	std::shared_ptr<const Expr> m_expr;
 };
@@ -114,6 +117,7 @@ public:
 
 	[[nodiscard]] std::any accept(ExprVisitor& visitor) const override;
 	[[nodiscard]] std::string to_string() const override;
+
 private:
 	Value m_value;
 };
@@ -122,7 +126,8 @@ private:
 class Ternary : public Expr
 {
 public:
-	Ternary(std::shared_ptr<const Expr> condition, Token qmark, std::shared_ptr<const Expr> then_branch, Token colon, std::shared_ptr<const Expr> else_branch);
+	Ternary(std::shared_ptr<const Expr> condition, Token qmark, std::shared_ptr<const Expr> then_branch, Token colon,
+		std::shared_ptr<const Expr> else_branch);
 
 	[[nodiscard]] const std::shared_ptr<const Expr>& get_condition() const;
 	[[nodiscard]] const Token& get_qmark() const;
@@ -132,6 +137,7 @@ public:
 
 	[[nodiscard]] std::any accept(ExprVisitor& visitor) const override;
 	[[nodiscard]] std::string to_string() const override;
+
 private:
 	std::shared_ptr<const Expr> m_condition;
 	Token m_qmark;
@@ -151,6 +157,7 @@ public:
 
 	[[nodiscard]] std::any accept(ExprVisitor& visitor) const override;
 	[[nodiscard]] std::string to_string() const override;
+
 private:
 	Token m_opr;
 	std::shared_ptr<const Expr> m_right;
@@ -166,6 +173,7 @@ public:
 
 	[[nodiscard]] std::any accept(ExprVisitor& visitor) const override;
 	[[nodiscard]] std::string to_string() const override;
+
 private:
 	Token m_name;
 };

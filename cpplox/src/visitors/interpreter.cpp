@@ -338,6 +338,16 @@ Interpreter::visit_print_stmt(const Print& stmt)
 }
 
 // =====================================================================================================================
+
+std::any
+Interpreter::visit_block_stmt(const Block& stmt)
+{
+	std::unique_ptr<Environment> block_environment = std::make_unique<Environment>(m_environment.get());
+	execute_block(stmt.get_statements(), std::move(block_environment));
+	return Value();
+}
+
+// =====================================================================================================================
 // Private methods
 
 std::any
@@ -351,4 +361,23 @@ void
 Interpreter::execute(const std::shared_ptr<const Stmt>& statement)
 {
 	std::ignore = statement->accept(*this);
+}
+
+void
+Interpreter::execute_block(const std::vector<std::shared_ptr<const Stmt>>& statements,
+	std::unique_ptr<Environment> block_environment)
+{
+	std::unique_ptr<Environment> previous = std::move(m_environment);
+	m_environment = std::move(block_environment);
+	try {
+		for (const std::shared_ptr<const Stmt>& statement : statements) {
+			execute(statement);
+		}
+	} catch (const RuntimeError& error) {
+		m_environment = std::move(previous);
+		throw error;
+	}
+	if (previous) {
+		m_environment = std::move(previous);
+	}
 }

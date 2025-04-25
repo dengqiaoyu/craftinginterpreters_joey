@@ -26,6 +26,7 @@ public:
 	[[nodiscard]] std::any visit_var_stmt(const Var& stmt) override;
 	[[nodiscard]] std::any visit_expression_stmt(const Expression& stmt) override;
 	[[nodiscard]] std::any visit_print_stmt(const Print& stmt) override;
+	[[nodiscard]] std::any visit_block_stmt(const Block& stmt) override;
 
 	void interpret(const std::vector<std::shared_ptr<Stmt>>& statements);
 
@@ -34,6 +35,8 @@ private:
 
 	[[nodiscard]] std::any evaluate(const std::shared_ptr<const Expr>& expr);
 	void execute(const std::shared_ptr<const Stmt>& statement);
+	void execute_block(const std::vector<std::shared_ptr<const Stmt>>& statements,
+		std::unique_ptr<Environment> block_environment);
 };
 
 #endif // INTERPRETER_H

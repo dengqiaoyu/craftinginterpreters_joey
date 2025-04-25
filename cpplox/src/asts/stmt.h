@@ -61,6 +61,7 @@ public:
 
 	[[nodiscard]] std::any accept(StmtVisitor& visitor) const override;
 	[[nodiscard]] std::string to_string() const override;
+
 private:
 	std::vector<std::shared_ptr<const Stmt>> m_statements;
 };
@@ -75,6 +76,7 @@ public:
 
 	[[nodiscard]] std::any accept(StmtVisitor& visitor) const override;
 	[[nodiscard]] std::string to_string() const override;
+
 private:
 	std::shared_ptr<const Expr> m_expr;
 };
@@ -89,6 +91,7 @@ public:
 
 	[[nodiscard]] std::any accept(StmtVisitor& visitor) const override;
 	[[nodiscard]] std::string to_string() const override;
+
 private:
 	std::shared_ptr<const Expr> m_expr;
 };
@@ -104,6 +107,7 @@ public:
 
 	[[nodiscard]] std::any accept(StmtVisitor& visitor) const override;
 	[[nodiscard]] std::string to_string() const override;
+
 private:
 	Token m_name;
 	std::shared_ptr<const Expr> m_initializer;

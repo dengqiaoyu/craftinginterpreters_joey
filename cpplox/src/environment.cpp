@@ -6,7 +6,7 @@
 // Public methods
 // =====================================================================================================================
 
-Environment::Environment(std::unique_ptr<Environment> enclosing) : m_enclosing(std::move(enclosing))
+Environment::Environment(Environment* enclosing) : m_enclosing(enclosing)
 {
 	// Left blank intentionally.
 }
@@ -29,7 +29,7 @@ Environment::assign(const Token& name, const std::any& value) // NOLINT(misc-no-
 		it->second = value;
 		return;
 	}
-	if (m_enclosing) {
+	if (m_enclosing != nullptr) {
 		m_enclosing->assign(name, value);
 		return;
 	}
@@ -45,7 +45,7 @@ Environment::get(const Token& name) // NOLINT(misc-no-recursion)
 	if (it != m_values.end()) {
 		return it->second;
 	}
-	if (m_enclosing) {
+	if (m_enclosing != nullptr) {
 		return m_enclosing->get(name);
 	}
 	throw RuntimeError(name, std::format("Undefined variable '{}'.", name.get_lexeme()));

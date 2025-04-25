@@ -70,8 +70,10 @@ private:
 	 * variable_declaration		-> "var" IDENTIFIER ( "=" expression )? ";" ;
 	 * statement				-> expression_statement
 	 *							| print_statement ;
+	 *							| block ;
 	 * expression_statement		-> expression ";" ;
 	 * print_statement			-> "print" expression ";" ;
+	 * block					-> "{" declaration* "}" ;
 	 */
 
 	std::shared_ptr<Stmt> declaration();
@@ -79,6 +81,7 @@ private:
 	std::shared_ptr<Stmt> statement();
 	std::shared_ptr<Stmt> expression_statement();
 	std::shared_ptr<Stmt> print_statement();
+	std::vector<std::shared_ptr<const Stmt>> block();
 
 	template <typename... VT_TokenType>
 		requires((std::is_same_v<VT_TokenType, TokenType>) && ...)
