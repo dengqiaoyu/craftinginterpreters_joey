@@ -23,7 +23,7 @@ private:
 
 	static Interpreter& get_interpreter();
 	static void report(size_t line, const std::string& where, const std::string& message);
-	static void run(const std::string& content);
+	static void run(const std::string& content, bool repl = false);
 };
 
 #endif // LOX_H

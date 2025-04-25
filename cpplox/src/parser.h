@@ -23,6 +23,7 @@ public:
 	}
 
 	std::vector<std::shared_ptr<Stmt>> parse();
+	std::shared_ptr<Expr> parse_expression();
 
 private:
 	std::vector<Token> m_tokens;

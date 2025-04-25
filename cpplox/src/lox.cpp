@@ -7,13 +7,16 @@
 #include <ios>
 #include <iostream>
 #include <iterator>
+#include <memory>
 #include <string>
 #include <sysexits.h> // EX_DATAERR (65)
 #include <vector>
 
+#include "asts/expr.h"
 #include "general.h"
 #include "parser.h"
 #include "scanner.h"
+#include "token_type.h"
 #include "utilities/lox_readline.h"
 #include "visitors/interpreter.h"
 
@@ -52,7 +55,7 @@ Lox::run_prompt()
 		if (line.empty()) {
 			continue;
 		}
-		run(line);
+		run(line, true);
 		m_had_error = false;
 		m_had_runtime_error = false;
 	}
@@ -89,18 +92,34 @@ Lox::get_interpreter()
 // =====================================================================================================================
 
 void
-Lox::run(const std::string& content)
+Lox::run(const std::string& content, const bool repl)
 {
 	const Scanner scanner(content);
 	const std::vector<Token>& tokens = scanner.get_tokens();
 
 	Parser parser(tokens);
 
+	bool skip_statements = false;
+	if (repl && tokens.size() >= 2 && (tokens.rbegin() + 1)->get_type() != TokenType::SEMICOLON) {
+		try {
+			std::shared_ptr<Expr> expr = parser.parse_expression();
+			if (expr != nullptr) {
+				get_interpreter().print_expression(expr);
+				skip_statements = true;
+			}
+		} catch (const std::exception& expression_e) {
+			(void)expression_e;
+		}
+	}
+	if (skip_statements) {
+		return;
+	}
+
 	try {
 		std::vector<std::shared_ptr<Stmt>> statements = parser.parse();
 		get_interpreter().interpret(statements);
-	} catch (const std::exception& e) {
-		(void)e;
+	} catch (const std::exception& statements_e) {
+		(void)statements_e;
 	}
 }
 

@@ -178,6 +178,15 @@ Interpreter::interpret(const std::vector<std::shared_ptr<Stmt>>& statements)
 }
 
 // =====================================================================================================================
+
+void
+Interpreter::print_expression(const std::shared_ptr<const Expr>& expr)
+{
+	std::any result = evaluate(expr);
+	std::cout << stringify(result) << std::endl;
+}
+
+// =====================================================================================================================
 // Visit expression.
 
 // ====================================================================================================================

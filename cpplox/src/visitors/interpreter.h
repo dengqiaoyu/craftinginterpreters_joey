@@ -29,6 +29,7 @@ public:
 	[[nodiscard]] std::any visit_block_stmt(const Block& stmt) override;
 
 	void interpret(const std::vector<std::shared_ptr<Stmt>>& statements);
+	void print_expression(const std::shared_ptr<const Expr>& expr);
 
 private:
 	std::unique_ptr<Environment> m_environment;
