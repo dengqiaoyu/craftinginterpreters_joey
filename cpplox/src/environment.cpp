@@ -1,5 +1,6 @@
 #include "environment.h"
 
+#include "general.h"
 #include "runtime_error.h"
 
 // =====================================================================================================================
@@ -42,11 +43,18 @@ std::any
 Environment::get(const Token& name) // NOLINT(misc-no-recursion)
 {
 	auto it = m_values.find(name.get_lexeme());
+	std::any value;
+	bool defined = false;
 	if (it != m_values.end()) {
-		return it->second;
+		value = it->second;
+		defined = true;
 	}
 	if (m_enclosing != nullptr) {
-		return m_enclosing->get(name);
+		value = m_enclosing->get(name);
+		defined = true;
 	}
-	throw RuntimeError(name, std::format("Undefined variable '{}'.", name.get_lexeme()));
+	require_throw(defined, RuntimeError(name, std::format("Undefined variable '{}'.", name.get_lexeme())));
+	require_throw(value.has_value(),
+		RuntimeError(name, std::format("Uninitialized variable '{}'.", name.get_lexeme())));
+	return value;
 }

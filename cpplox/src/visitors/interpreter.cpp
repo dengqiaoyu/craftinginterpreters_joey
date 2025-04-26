@@ -319,7 +319,7 @@ Interpreter::visit_unary_expr(const Unary& expr)
 std::any
 Interpreter::visit_var_stmt(const Var& stmt)
 {
-	std::any value = Value();
+	std::any value;
 	if (stmt.get_initializer()) {
 		value = evaluate(stmt.get_initializer());
 	}
