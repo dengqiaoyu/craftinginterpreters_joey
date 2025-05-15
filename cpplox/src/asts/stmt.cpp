@@ -95,6 +95,32 @@ Expression::to_string() const
 }
 
 // =====================================================================================================================
+// ExpressionResult
+
+ExpressionResult::ExpressionResult(std::shared_ptr<const Expr> expr) : m_expr(std::move(expr))
+{
+	// Empty constructor.
+}
+
+const std::shared_ptr<const Expr>&
+ExpressionResult::get_expr() const
+{
+	return m_expr;
+}
+
+std::any
+ExpressionResult::accept(StmtVisitor& visitor) const
+{
+	return visitor.visit_expressionresult_stmt(*this);
+}
+
+std::string
+ExpressionResult::to_string() const
+{
+	return std::format("ExpressionResult stmt{{expr={}}}", m_expr->to_string());
+}
+
+// =====================================================================================================================
 // Print
 
 Print::Print(std::shared_ptr<const Expr> expr) : m_expr(std::move(expr))

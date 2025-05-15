@@ -1,5 +1,6 @@
 #include "lox.h"
 
+#include <any>
 #include <cstddef>
 #include <cstdlib>
 #include <format>
@@ -94,32 +95,28 @@ Lox::get_interpreter()
 void
 Lox::run(const std::string& content, const bool repl)
 {
+	// Reset interpreter state at the beginning to ensure no previous results are shown if parsing fails
+	get_interpreter().reset_last_expression_state();
+
 	const Scanner scanner(content);
 	const std::vector<Token>& tokens = scanner.get_tokens();
 
-	Parser parser(tokens);
-
-	bool skip_statements = false;
-	if (repl && tokens.size() >= 2 && (tokens.rbegin() + 1)->get_type() != TokenType::SEMICOLON) {
-		try {
-			std::shared_ptr<Expr> expr = parser.parse_expression();
-			if (expr != nullptr) {
-				get_interpreter().print_expression(expr);
-				skip_statements = true;
-			}
-		} catch (const std::exception& expression_e) {
-			(void)expression_e;
-		}
-	}
-	if (skip_statements) {
-		return;
-	}
-
+	Parser parser(tokens, repl);
 	try {
 		std::vector<std::shared_ptr<Stmt>> statements = parser.parse();
 		get_interpreter().interpret(statements);
 	} catch (const std::exception& statements_e) {
+		// Parsing or interpretation failed
 		(void)statements_e;
+	}
+
+	// In REPL mode, check if the last expression was evaluated
+	if (repl) {
+		bool last_expression_evaluated = false;
+		std::any last_expression_result = get_interpreter().get_last_expression_result(last_expression_evaluated);
+		if (last_expression_evaluated) {
+			std::cout << Interpreter::stringify(last_expression_result) << std::endl;
+		}
 	}
 }
 

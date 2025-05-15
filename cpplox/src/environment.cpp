@@ -49,7 +49,7 @@ Environment::get(const Token& name) // NOLINT(misc-no-recursion)
 		value = it->second;
 		defined = true;
 	}
-	if (m_enclosing != nullptr) {
+	if (!defined && m_enclosing != nullptr) {
 		value = m_enclosing->get(name);
 		defined = true;
 	}

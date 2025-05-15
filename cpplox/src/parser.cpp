@@ -43,23 +43,20 @@ Parser::parse()
 	while (!is_at_end()) {
 		std::shared_ptr<Stmt> statement = declaration();
 		if (statement != nullptr) {
+			// Check if this statement is an ExpressionResult (expression without semicolon in REPL mode)
+			auto expr_result = std::dynamic_pointer_cast<const ExpressionResult>(statement);
+
+			// If it's an ExpressionResult, ensure it's the last statement
+			if (expr_result && !is_at_end()) {
+				// Not the last statement, so this should have had a semicolon
+				throw error(previous(), "Expect ';' after expression.");
+			}
+
 			statements.push_back(statement);
 		}
 	}
 
 	return statements;
-}
-
-// =====================================================================================================================
-
-std::shared_ptr<Expr>
-Parser::parse_expression()
-{
-	std::shared_ptr<Expr> expr = comma_expression();
-	if (expr == nullptr) {
-		error(previous(), "Expect expression.");
-	}
-	return expr;
 }
 
 // =====================================================================================================================
@@ -326,6 +323,9 @@ std::shared_ptr<Stmt>
 Parser::expression_statement()
 {
 	std::shared_ptr<Expr> expr = expression();
+	if (m_is_repl_mode && !check(TokenType::SEMICOLON)) {
+		return std::make_shared<ExpressionResult>(expr);
+	}
 	consume(TokenType::SEMICOLON, "Expect ';' after expression.");
 	return std::make_shared<Expression>(expr);
 }
@@ -347,8 +347,19 @@ Parser::block() // NOLINT(misc-no-recursion)
 {
 	std::vector<std::shared_ptr<const Stmt>> statements;
 	while (!check(TokenType::RIGHT_BRACE) && !is_at_end()) {
+		// Get the statement from declaration
 		std::shared_ptr<const Stmt> statement = declaration();
+
 		if (statement != nullptr) {
+			// Check if this statement is an ExpressionResult (expression without semicolon in REPL mode)
+			auto expr_result = std::dynamic_pointer_cast<const ExpressionResult>(statement);
+
+			// If it's an ExpressionResult, ensure it's the last statement in the block
+			if (expr_result && !check(TokenType::RIGHT_BRACE)) {
+				// Not the last statement in the block, so this should have had a semicolon
+				throw error(previous(), "Expect ';' after expression.");
+			}
+
 			statements.push_back(statement);
 		}
 	}

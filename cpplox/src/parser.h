@@ -17,17 +17,19 @@ class Parser
 public:
 	template <typename T_TokenVector>
 		requires std::convertible_to<T_TokenVector, std::vector<Token>>
-	explicit Parser(T_TokenVector&& tokens) : m_tokens(std::forward<T_TokenVector>(tokens))
+	explicit Parser(T_TokenVector&& tokens, const bool is_repl_mode)
+		: m_tokens(std::forward<T_TokenVector>(tokens)), m_is_repl_mode(is_repl_mode)
 	{
 		// Empty constructor.
 	}
 
 	std::vector<std::shared_ptr<Stmt>> parse();
-	std::shared_ptr<Expr> parse_expression();
 
 private:
 	std::vector<Token> m_tokens;
 	size_t current = 0;
+	bool m_is_repl_mode = false;
+	CLASS_PADDING(7);
 
 	[[nodiscard]] const std::vector<Token>& get_tokens() const;
 

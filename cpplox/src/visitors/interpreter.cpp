@@ -132,25 +132,6 @@ is_equal(const std::any& a, const std::any& b)
 	require_assert_message(false, "Unknown type in is_equal");
 }
 
-// =====================================================================================================================
-
-std::string
-stringify(const std::any& any, const bool is_print_statement = false)
-{
-	if (!any.has_value()) {
-		return "nil";
-	}
-	if (any.type() == typeid(Value)) {
-		const Value& value = std::any_cast<Value>(any);
-		std::string value_str = std::any_cast<Value>(any).to_string();
-		if (!is_print_statement && value.is_string()) {
-			value_str = "\"" + value_str + "\"";
-		}
-		return value_str;
-	}
-	require_assert_message(false, "Unknown type in stringify");
-}
-
 } // namespace
 
 // =====================================================================================================================
@@ -169,6 +150,8 @@ void
 Interpreter::interpret(const std::vector<std::shared_ptr<Stmt>>& statements)
 {
 	try {
+		m_last_expression_evaluated = false;
+		m_last_expression_result = std::any();
 		for (const std::shared_ptr<Stmt>& statement : statements) {
 			execute(statement);
 		}
@@ -184,6 +167,43 @@ Interpreter::print_expression(const std::shared_ptr<const Expr>& expr)
 {
 	std::any result = evaluate(expr);
 	std::cout << stringify(result) << std::endl;
+}
+
+// =====================================================================================================================
+
+void
+Interpreter::reset_last_expression_state()
+{
+	m_last_expression_evaluated = false;
+	m_last_expression_result = std::any();
+}
+
+// =====================================================================================================================
+
+std::any
+Interpreter::get_last_expression_result(bool& out_last_expression_evaluated)
+{
+	out_last_expression_evaluated = m_last_expression_evaluated;
+	return m_last_expression_result;
+}
+
+// =====================================================================================================================
+
+std::string
+Interpreter::stringify(const std::any& any, const bool is_print_statement)
+{
+	if (!any.has_value()) {
+		return "nil";
+	}
+	if (any.type() == typeid(Value)) {
+		const Value& value = std::any_cast<Value>(any);
+		std::string value_str = std::any_cast<Value>(any).to_string();
+		if (!is_print_statement && value.is_string()) {
+			value_str = "\"" + value_str + "\"";
+		}
+		return value_str;
+	}
+	require_assert_message(false, "Unknown type in stringify");
 }
 
 // =====================================================================================================================
@@ -333,6 +353,16 @@ std::any
 Interpreter::visit_expression_stmt(const Expression& stmt)
 {
 	std::ignore = evaluate(stmt.get_expr());
+	return Value();
+}
+
+// =====================================================================================================================
+
+std::any
+Interpreter::visit_expressionresult_stmt(const ExpressionResult& stmt)
+{
+	m_last_expression_result = evaluate(stmt.get_expr());
+	m_last_expression_evaluated = true;
 	return Value();
 }
 

@@ -65,6 +65,18 @@ is_shared_ptr_type(const std::string& type)
 	return type.find("shared_ptr") != std::string::npos;
 }
 
+static bool
+is_bool_type(const std::string& type)
+{
+	return type == "bool";
+}
+
+static bool
+is_primitive_type(const std::string& type)
+{
+	return is_bool_type(type);
+}
+
 // NOLINTBEGIN(readability-function-cognitive-complexity, bugprone-easily-swappable-parameters)
 static int
 generate_ast(const std::string& output_dir_path, const std::vector<std::string>& additional_headers,
@@ -324,7 +336,11 @@ generate_ast(const std::string& output_dir_path, const std::vector<std::string>&
 		cs << ")\n";
 		cs << fmt_str("	: ");
 		for (size_t i = 0; i < members.size(); ++i) {
-			cs << fmt_str("m_%s(std::move(%s))", members[i].second.c_str(), members[i].second.c_str());
+			if (is_primitive_type(members[i].first)) {
+				cs << fmt_str("m_%s(%s)", members[i].second.c_str(), members[i].second.c_str());
+			} else {
+				cs << fmt_str("m_%s(std::move(%s))", members[i].second.c_str(), members[i].second.c_str());
+			}
 			if (i != members.size() - 1) {
 				cs << ", ";
 			}
@@ -376,6 +392,8 @@ generate_ast(const std::string& output_dir_path, const std::vector<std::string>&
 				cs << fmt_str("m_%s", members[i].second.c_str());
 			} else if (is_ptr_type(members[i].first)) {
 				cs << fmt_str("m_%s->to_string()", members[i].second.c_str());
+			} else if (is_bool_type(members[i].first)) {
+				cs << fmt_str("m_%s", members[i].second.c_str());
 			} else {
 				cs << fmt_str("m_%s.to_string()", members[i].second.c_str());
 			}
@@ -457,6 +475,11 @@ main()
 				}
 			),
 			ASTClass("Expression",
+				{
+					{"std::shared_ptr<const Expr>",	"expr"}
+				}
+			),
+			ASTClass("ExpressionResult",
 				{
 					{"std::shared_ptr<const Expr>",	"expr"}
 				}

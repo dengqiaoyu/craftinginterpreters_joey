@@ -13,6 +13,7 @@
 // Forward declarations.
 class Block;
 class Expression;
+class ExpressionResult;
 class Print;
 class Var;
 
@@ -30,6 +31,7 @@ public:
 
 	[[nodiscard]] virtual std::any visit_block_stmt(const Block& stmt) = 0;
 	[[nodiscard]] virtual std::any visit_expression_stmt(const Expression& stmt) = 0;
+	[[nodiscard]] virtual std::any visit_expressionresult_stmt(const ExpressionResult& stmt) = 0;
 	[[nodiscard]] virtual std::any visit_print_stmt(const Print& stmt) = 0;
 	[[nodiscard]] virtual std::any visit_var_stmt(const Var& stmt) = 0;
 };
@@ -71,6 +73,21 @@ class Expression : public Stmt
 {
 public:
 	explicit Expression(std::shared_ptr<const Expr> expr);
+
+	[[nodiscard]] const std::shared_ptr<const Expr>& get_expr() const;
+
+	[[nodiscard]] std::any accept(StmtVisitor& visitor) const override;
+	[[nodiscard]] std::string to_string() const override;
+
+private:
+	std::shared_ptr<const Expr> m_expr;
+};
+
+// =====================================================================================================================
+class ExpressionResult : public Stmt
+{
+public:
+	explicit ExpressionResult(std::shared_ptr<const Expr> expr);
 
 	[[nodiscard]] const std::shared_ptr<const Expr>& get_expr() const;
 
